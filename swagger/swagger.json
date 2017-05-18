@@ -1,0 +1,329 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "DevCloud API",
+        "version": "1.0.0",
+        "termsOfService": "http://10.11.20.102:6979/DevClouds",
+        "contact": {
+            "email": "yaoyf@asiainfo.com"
+        }
+    },
+    "basePath": "/v1",
+    "paths": {
+        "/dc/checkout": {
+            "get": {
+                "tags": [
+                    "dc"
+                ],
+                "description": "checkout code",
+                "operationId": "DevCloudController.DevCloud checkout code",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "project_name",
+                        "description": "project name",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"result\":\"Checkout sucess |Checkout has error\"}"
+                    },
+                    "50X": {
+                        "description": "app has error"
+                    }
+                }
+            }
+        },
+        "/dc/compile": {
+            "get": {
+                "tags": [
+                    "dc"
+                ],
+                "description": "compile code",
+                "operationId": "DevCloudController.DevCloud compile code",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "project_name",
+                        "description": "project name",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"result\":\"Compile sucess |Compile has error\"}"
+                    },
+                    "50X": {
+                        "description": "app has error"
+                    }
+                }
+            }
+        },
+        "/dc/create": {
+            "get": {
+                "tags": [
+                    "dc"
+                ],
+                "description": "Create project",
+                "operationId": "DevCloudController.DevCloud Create Project",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "project_name",
+                        "description": "project name",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "query",
+                        "name": "svn_url",
+                        "description": "project svn",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"result\":\"Create sucess |Create has error\"}"
+                    },
+                    "50X": {
+                        "description": "app has error"
+                    }
+                }
+            }
+        },
+        "/dc/pack": {
+            "get": {
+                "tags": [
+                    "dc"
+                ],
+                "description": "Pack project",
+                "operationId": "DevCloudController.DevCloud Pack Project",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "project_name",
+                        "description": "project_name",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "query",
+                        "name": "version",
+                        "description": "version",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"result\":\"Pack sucess http://****|Pack has error\"}"
+                    },
+                    "50X": {
+                        "description": "app has error"
+                    }
+                }
+            }
+        },
+        "/object/": {
+            "get": {
+                "tags": [
+                    "object"
+                ],
+                "description": "get all objects",
+                "operationId": "ObjectController.GetAll",
+                "responses": {
+                    "200": {
+                        "schema": {
+                            "$ref": "#/definitions/models.Object"
+                        }
+                    },
+                    "403": {
+                        "description": ":objectId is empty"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "object"
+                ],
+                "description": "create object",
+                "operationId": "ObjectController.Create",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "The object content",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.Object"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{string} models.Object.Id"
+                    },
+                    "403": {
+                        "description": "body is empty"
+                    }
+                }
+            }
+        },
+        "/object/{objectId}": {
+            "get": {
+                "tags": [
+                    "object"
+                ],
+                "description": "find object by objectid",
+                "operationId": "ObjectController.Get",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "objectId",
+                        "description": "the objectid you want to get",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "schema": {
+                            "$ref": "#/definitions/models.Object"
+                        }
+                    },
+                    "403": {
+                        "description": ":objectId is empty"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "object"
+                ],
+                "description": "update the object",
+                "operationId": "ObjectController.Update",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "objectId",
+                        "description": "The objectid you want to update",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "The body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.Object"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "schema": {
+                            "$ref": "#/definitions/models.Object"
+                        }
+                    },
+                    "403": {
+                        "description": ":objectId is empty"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "object"
+                ],
+                "description": "delete the object",
+                "operationId": "ObjectController.Delete",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "objectId",
+                        "description": "The objectId you want to delete",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{string} delete success!"
+                    },
+                    "403": {
+                        "description": "objectId is empty"
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "models.Object": {
+            "title": "Object",
+            "type": "object",
+            "properties": {
+                "ObjectId": {
+                    "type": "string"
+                },
+                "PlayerName": {
+                    "type": "string"
+                },
+                "Score": {
+                    "type": "integer",
+                    "format": "int64"
+                }
+            }
+        },
+        "models.Profile": {
+            "title": "Profile",
+            "type": "object",
+            "properties": {
+                "Address": {
+                    "type": "string"
+                },
+                "Age": {
+                    "type": "integer",
+                    "format": "int64"
+                },
+                "Email": {
+                    "type": "string"
+                },
+                "Gender": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.User": {
+            "title": "User",
+            "type": "object",
+            "properties": {
+                "Id": {
+                    "type": "string"
+                },
+                "Password": {
+                    "type": "string"
+                },
+                "Profile": {
+                    "$ref": "#/definitions/models.Profile"
+                },
+                "Username": {
+                    "type": "string"
+                }
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "object",
+            "description": "Operations about object\n"
+        },
+        {
+            "name": "dc",
+            "description": "Operations about devclouds\n"
+        }
+    ]
+}
