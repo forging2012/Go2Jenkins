@@ -3,8 +3,10 @@ package controllers
 import (
 	"devcloud/models"
 	"encoding/json"
+	"reflect"
 
 	"github.com/astaxie/beego"
+	"github.com/astaxie/beego/logs"
 )
 
 // Operations about object
@@ -52,6 +54,9 @@ func (o *ObjectController) Get() {
 // @router / [get]
 func (o *ObjectController) GetAll() {
 	obs := models.GetAll()
+	//host := o.Ctx.Input.IP()
+	abc := beego.AppConfig.String("allow_ip")
+	logs.Debug(reflect.TypeOf(abc))
 	o.Data["json"] = obs
 	o.ServeJSON()
 }

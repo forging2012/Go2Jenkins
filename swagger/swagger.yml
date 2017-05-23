@@ -23,7 +23,30 @@ paths:
         50X:
           description: app has error
         "200":
-          description: '{"result":"Checkout sucess |Checkout has error"}'
+          schema:
+            $ref: '#/definitions/models.Result'
+        "403":
+          description: forbidden
+  /dc/codecheck:
+    get:
+      tags:
+      - dc
+      description: code check
+      operationId: DevCloudController.DevCloud code check
+      parameters:
+      - in: query
+        name: project_name
+        description: project name
+        required: true
+        type: string
+      responses:
+        50X:
+          description: app has error
+        "200":
+          schema:
+            $ref: '#/definitions/models.Result'
+        "403":
+          description: forbidden
   /dc/compile:
     get:
       tags:
@@ -40,7 +63,10 @@ paths:
         50X:
           description: app has error
         "200":
-          description: '{"result":"Compile sucess |Compile has error"}'
+          schema:
+            $ref: '#/definitions/models.Result'
+        "403":
+          description: forbidden
   /dc/create:
     get:
       tags:
@@ -62,7 +88,10 @@ paths:
         50X:
           description: app has error
         "200":
-          description: '{"result":"Create sucess |Create has error"}'
+          schema:
+            $ref: '#/definitions/models.Result'
+        "403":
+          description: forbidden
   /dc/pack:
     get:
       tags:
@@ -84,7 +113,10 @@ paths:
         50X:
           description: app has error
         "200":
-          description: '{"result":"Pack sucess http://****|Pack has error"}'
+          schema:
+            $ref: '#/definitions/models.Result'
+        "403":
+          description: forbidden
   /object/:
     get:
       tags:
@@ -195,6 +227,22 @@ definitions:
       Email:
         type: string
       Gender:
+        type: string
+  models.Result:
+    title: Result
+    type: object
+    properties:
+      _index:
+        type: string
+      _type:
+        type: string
+      ID:
+        type: string
+      current:
+        type: string
+      next:
+        type: string
+      result:
         type: string
   models.User:
     title: User

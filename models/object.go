@@ -4,8 +4,8 @@ import (
 	"errors"
 	"strconv"
 	"time"
-	"github.com/astaxie/beego/logs"
-	"github.com/astaxie/beego"
+	//"github.com/astaxie/beego/logs"
+	//"github.com/astaxie/beego"
 )
 
 var (
@@ -38,7 +38,7 @@ func GetOne(ObjectId string) (object *Object, err error) {
 }
 
 func GetAll() map[string]*Object {
-	logs.Debug(beego.AppConfig.String("create"))
+	//logs.Debug(beego.AppConfig.String("create"))
 	return Objects
 }
 
