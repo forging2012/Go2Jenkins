@@ -60,15 +60,14 @@ func LoadCron(){
 	var croninfos []CronInfo
 	//json反序列化可以存储struct的切片中
 	if err := json.Unmarshal([]byte(cronconig), &croninfos); err != nil {
-            fmt.Println(err)
-    }
+		fmt.Println(err)
+	}
 	for _, croninfo := range croninfos {
-			addTask(croninfo)
-    }
+		addTask(croninfo)
+	}
 }
 
 func init(){
 	LoadCron()
 	addTask4Monitor()
-	//fmt.Println(toolbox.AdminTaskList)
 }
