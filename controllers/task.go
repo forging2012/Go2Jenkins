@@ -2,7 +2,7 @@ package controllers
 
 import (
 	"test/models"
-	"encoding/json"
+	//"encoding/json"
 
 	"github.com/astaxie/beego"
 )
@@ -23,6 +23,6 @@ func (at *AddTaskController) AddTk() {
 	project_name := at.GetString("project_name")
 	spec := at.GetString("spec")
 	models.AddT(project_name,spec)
-	o.Data["json"] = map[string]string{"status": 200}
-	o.ServeJSON()
+	at.Data["json"] = map[string]string{"status": 200}
+	at.ServeJSON()
 }
