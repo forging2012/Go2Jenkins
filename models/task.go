@@ -19,15 +19,15 @@ func AddTask(name,spec string) {
 }
 
 func DelTask(name string) {
-    toolbox.DeleteTask(name)
+	toolbox.DeleteTask(name)
 }
 
 func addTask(ci CronInfo) {
 	f:= func() error { fmt.Println(ci.Project,time.Now()); return nil }
 	tk := toolbox.NewTask(ci.Project, ci.Spec, f)
 	toolbox.AddTask(ci.Project, tk)
-	//fmt.Println(toolbox.AdminTaskList)
 }
+
 func addTask4Monitor(){
 	f:= func() error { monitor(); return nil }
 	tk := toolbox.NewTask("monitor", "*/10 * * * * *", f)
