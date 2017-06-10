@@ -6,25 +6,27 @@ import (
 	"time"
 	
 	"github.com/astaxie/beego"
-	"github.com/astaxie/beego/logs"
 	"github.com/astaxie/beego/toolbox"
 )
 
 func AddTask(name,spec string) {
 	f:= func() error { fmt.Println(name,time.Now()); return nil }
-	tk := toolbox.NewTask(name, spec, f)
-	toolbox.AddTask(name, tk)
-	tk.Run()
-	toolbox.StopTask()
-	toolbox.StartTask()
-	logs.Debug(tk.GetStatus())
-}
-
-func addTask(name,spec string) {
-	f:= func() error { fmt.Println(name,time.Now()); return nil }
     	tk := toolbox.NewTask(name, spec, f)
     	toolbox.AddTask(name, tk)
+	toolbox.StopTask()
+	toolbox.StartTask()
 }
+
+func DelTask(name string) {
+    	toolbox.DeleteTask(name)
+}
+
+func addTask(ci CronInfo) {
+	f:= func() error { fmt.Println(ci.Project,time.Now()); return nil }
+    	tk := toolbox.NewTask(ci.Project, ci.Spec, f)
+    	toolbox.AddTask(ci.Project, tk)
+}
+
 
 type CronInfo struct {
 	Project string `json:"project"`
@@ -38,8 +40,7 @@ func LoadCron(){
             fmt.Println(err)
     	}
 	for _, b := range data {
-            fmt.Println(b.Project, b.Spec)  //显示2组数据
-            addTask(b.Project,b.Spec)
+			addTask(b)
     	}
 }
 
