@@ -8,7 +8,7 @@ import (
 )
 
 // Operations about object
-type AddTaskController struct {
+type TaskController struct {
 	beego.Controller
 }
 
@@ -18,11 +18,24 @@ type AddTaskController struct {
 // @Param	spec		query 	string	true		"task time"
 // @Success 200 ***** ***** 
 // @Failure 403 body is empty
-// @router / [get]
-func (at *AddTaskController) AddTk() {
-	project_name := at.GetString("project_name")
-	spec := at.GetString("spec")
-	models.AddT(project_name,spec)
-	at.Data["json"] = map[string]int{"status": 200}
-	at.ServeJSON()
+// @router /add [get]
+func (t *TaskController) Add() {
+	project_name := t.GetString("project_name")
+	spec := t.GetString("spec")
+	models.AddTask(project_name,spec)
+	t.Data["json"] = map[string]int{"status": 200}
+	t.ServeJSON()
+}
+
+// @Title DelTask
+// @Description del task
+// @Param	project_name		query 	string	true		"project_name"
+// @Success 200 ***** ***** 
+// @Failure 403 body is empty
+// @router /del [get]
+func (t *TaskController) Del() {
+	project_name := t.GetString("project_name")
+	models.DelTask(project_name)
+	t.Data["json"] = map[string]int{"status": 200}
+	t.ServeJSON()
 }
