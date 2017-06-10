@@ -23,6 +23,6 @@ func (at *AddTaskController) AddTk() {
 	project_name := at.GetString("project_name")
 	spec := at.GetString("spec")
 	models.AddT(project_name,spec)
-	at.Data["json"] = map[string]string{"status": 200}
+	at.Data["json"] = map[string]int{"status": 200}
 	at.ServeJSON()
 }
