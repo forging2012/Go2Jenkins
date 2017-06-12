@@ -4,6 +4,7 @@ import (
 	"os/exec"
 	"strings"
 	"regexp"
+	"time"
 	"net/url"
 	"github.com/astaxie/beego"
 	//"github.com/astaxie/beego/logs"
@@ -17,7 +18,9 @@ type Result struct {
 	_type       string
 	result      string
 	current     string
-	next        string
+	//next        string
+	PACKAGE_URL        string
+	SONAR_URL   string
 }
 
 var resp map[string]string
@@ -34,6 +37,7 @@ func writeEs(opt,ret string)(string,string,string,error) {
                 Type:  opt,
                 Fields: map[string]interface{}{
                         "msg":    ret,
+			"intime": time.Now().Format("2006-01-02 15:04:05"),
                 },
         }
         extraArgs := make(url.Values,0)
@@ -50,11 +54,11 @@ func GetCreateResult(project_name,svn_url string) (resp map[string]string) {
         if err != nil {
                 ret = string(out)+"|"+err.Error()
 		resp["current"] = "N"
-		resp["next"] = "N"
+		//resp["next"] = "N"
         } else {
 		ret = project_name+" Create sucess"
 		resp["current"] = "Y"
-                resp["next"] = "Y"
+                //resp["next"] = "Y"
         }
 	//write es
 	Index,Type,Id,err := writeEs("create",ret)
@@ -63,6 +67,8 @@ func GetCreateResult(project_name,svn_url string) (resp map[string]string) {
                 resp["es_result"] = err.Error()
                 return
 	}
+	resp["PACKAGE_URL"] = ""
+	resp["SONAR_URL"] = ""
 	resp["_index"] = Index
 	resp["_type"] = Type
 	resp["ID"] = Id
@@ -78,11 +84,11 @@ func GetCheckOutResult(project_name string) (resp map[string]string) {
         if err != nil {
                 ret = string(out)+"|"+err.Error()
 		resp["current"] = "N"
-                resp["next"] = "N"
+                //resp["next"] = "N"
         } else {
 		ret = string(out)
 		resp["current"] = "Y"
-                resp["next"] = "Y"
+                //resp["next"] = "Y"
         }
 	
 	//write es
@@ -92,6 +98,8 @@ func GetCheckOutResult(project_name string) (resp map[string]string) {
                 resp["es_result"] = err.Error()
                 return
         }
+	resp["PACKAGE_URL"] = ""
+        resp["SONAR_URL"] = ""
         resp["_index"] = Index
         resp["_type"] = Type
         resp["ID"] = Id
@@ -107,13 +115,15 @@ func GetCodeCheckResult(project_name string) (resp map[string]string) {
         if err != nil {
                 ret = string(out)+"|"+err.Error()
 		resp["current"] = "N"
-                resp["next"] = "N"
+		resp["SONAR_URL"] = ""
+                //resp["next"] = "N"
         } else {
-		//reg := regexp.MustCompile("SONAR_URL:.*[0-9]")
-		//SONAR_URL := strings.Replace(reg.FindAllString(string(out), -1)[0],"SONAR_URL:","",-1)
+		reg := regexp.MustCompile("SONAR_URL:.*[a-z]")
+		SONAR_URL := strings.Replace(reg.FindAllString(string(out), -1)[0],"SONAR_URL:","",-1)
+		resp["SONAR_URL"] = SONAR_URL
 		ret = string(out)
 		resp["current"] = "Y"
-                resp["next"] = "Y"
+                //resp["next"] = "Y"
         }
 	
 	//write es
@@ -123,6 +133,7 @@ func GetCodeCheckResult(project_name string) (resp map[string]string) {
                 resp["es_result"] = err.Error()
                 return
         }
+	resp["PACKAGE_URL"] = ""
         resp["_index"] = Index
         resp["_type"] = Type
         resp["ID"] = Id
@@ -137,12 +148,12 @@ func GetCompileResult(project_name string) (resp map[string]string) {
         if err != nil {
                 ret = string(out)+"|"+err.Error()
 		resp["current"] = "N"
-                resp["next"] = "N"
+                //resp["next"] = "N"
         } else {
                 //ret = "Compile sucess "+project_name
                 ret = string(out)
 		resp["current"] = "Y"
-                resp["next"] = "Y"
+                //resp["next"] = "Y"
         }
 	//write es
 	Index,Type,Id,err := writeEs("compile",ret)
@@ -151,6 +162,8 @@ func GetCompileResult(project_name string) (resp map[string]string) {
                 resp["es_result"] = err.Error()
                 return
         }
+	resp["PACKAGE_URL"] = ""
+	resp["SONAR_URL"] = ""
         resp["_index"] = Index
         resp["_type"] = Type
         resp["ID"] = Id
@@ -158,26 +171,29 @@ func GetCompileResult(project_name string) (resp map[string]string) {
 	return
 }
 	
-func GetPackResult(project_name,version string) (resp map[string]string)  {
+func GetPackResult(project_name,version,isE string) (resp map[string]string)  {
 	resp = make(map[string]string)
 	var ret string
-        out, err := exec.Command("/bin/bash", beego.AppConfig.String("pack"),project_name,version).Output()
+        out, err := exec.Command("/bin/bash", beego.AppConfig.String("pack"),project_name,version,isE).Output()
         if err != nil {
                 ret = string(out)+"|"+err.Error()
 		resp["current"] = "N"
-                resp["next"] = "N"
+		resp["PACKAGE_URL"] = ""
+                //resp["next"] = "N"
         } else {
 		isok := strings.Contains(string(out),"ERROR")
 		if(!isok){
+			ret = string(out)
 			reg := regexp.MustCompile("PACKAGE_URL:.*[0-9]")
 			PACKAGE_URL := strings.Replace(reg.FindAllString(string(out), -1)[0],"PACKAGE_URL:","",-1)
-			ret = "Pack sucess "+PACKAGE_URL
+			resp["PACKAGE_URL"] = PACKAGE_URL
 			resp["current"] = "Y"
-                	resp["next"] = "Y"
+                	//resp["next"] = "Y"
 		} else {
 			ret = string(out)
 			resp["current"] = "N"
-                	resp["next"] = "N"
+			resp["PACKAGE_URL"] = ""
+                	//resp["next"] = "N"
 		}
         }
 	
@@ -188,6 +204,7 @@ func GetPackResult(project_name,version string) (resp map[string]string)  {
                 resp["es_result"] = err.Error()
                 return
         }
+	resp["SONAR_URL"] = ""
         resp["_index"] = Index
         resp["_type"] = Type
         resp["ID"] = Id

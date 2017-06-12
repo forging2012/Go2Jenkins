@@ -152,14 +152,21 @@
                     {
                         "in": "query",
                         "name": "project_name",
-                        "description": "project_name",
+                        "description": "project name",
                         "required": true,
                         "type": "string"
                     },
                     {
                         "in": "query",
                         "name": "version",
-                        "description": "version",
+                        "description": "project version",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "query",
+                        "name": "isE",
+                        "description": "是否紧急发布Y/N",
                         "required": true,
                         "type": "string"
                     }
@@ -179,44 +186,46 @@
                 }
             }
         },
-        "/object/": {
+        "/index/": {
             "get": {
                 "tags": [
-                    "object"
+                    "index"
                 ],
-                "description": "get all objects",
-                "operationId": "ObjectController.GetAll",
+                "description": "hellp api",
+                "operationId": "IndexController.GetAll",
                 "responses": {
                     "200": {
-                        "schema": {
-                            "$ref": "#/definitions/models.Object"
-                        }
-                    },
-                    "403": {
-                        "description": ":objectId is empty"
+                        "description": "hello api"
                     }
                 }
-            },
-            "post": {
+            }
+        },
+        "/task/add": {
+            "get": {
                 "tags": [
-                    "object"
+                    "task"
                 ],
-                "description": "create object",
-                "operationId": "ObjectController.Create",
+                "description": "add task",
+                "operationId": "TaskController.AddTask",
                 "parameters": [
                     {
-                        "in": "body",
-                        "name": "body",
-                        "description": "The object content",
+                        "in": "query",
+                        "name": "project_name",
+                        "description": "project_name",
                         "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.Object"
-                        }
+                        "type": "string"
+                    },
+                    {
+                        "in": "query",
+                        "name": "spec",
+                        "description": "task time",
+                        "required": true,
+                        "type": "string"
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "{string} models.Object.Id"
+                        "description": "{\"status\": 200}"
                     },
                     "403": {
                         "description": "body is empty"
@@ -224,89 +233,54 @@
                 }
             }
         },
-        "/object/{objectId}": {
+        "/task/del": {
             "get": {
                 "tags": [
-                    "object"
+                    "task"
                 ],
-                "description": "find object by objectid",
-                "operationId": "ObjectController.Get",
+                "description": "delete task",
+                "operationId": "TaskController.DelTask",
                 "parameters": [
                     {
-                        "in": "path",
-                        "name": "objectId",
-                        "description": "the objectid you want to get",
+                        "in": "query",
+                        "name": "project_name",
+                        "description": "project_name",
                         "required": true,
                         "type": "string"
                     }
                 ],
                 "responses": {
                     "200": {
-                        "schema": {
-                            "$ref": "#/definitions/models.Object"
-                        }
+                        "description": "{\"status\": 200}"
                     },
                     "403": {
-                        "description": ":objectId is empty"
+                        "description": "body is empty"
                     }
                 }
-            },
-            "put": {
+            }
+        },
+        "/task/delay": {
+            "get": {
                 "tags": [
-                    "object"
+                    "task"
                 ],
-                "description": "update the object",
-                "operationId": "ObjectController.Update",
+                "description": "delete task",
+                "operationId": "TaskController.DelTask",
                 "parameters": [
                     {
-                        "in": "path",
-                        "name": "objectId",
-                        "description": "The objectid you want to update",
-                        "required": true,
-                        "type": "string"
-                    },
-                    {
-                        "in": "body",
-                        "name": "body",
-                        "description": "The body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.Object"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "schema": {
-                            "$ref": "#/definitions/models.Object"
-                        }
-                    },
-                    "403": {
-                        "description": ":objectId is empty"
-                    }
-                }
-            },
-            "delete": {
-                "tags": [
-                    "object"
-                ],
-                "description": "delete the object",
-                "operationId": "ObjectController.Delete",
-                "parameters": [
-                    {
-                        "in": "path",
-                        "name": "objectId",
-                        "description": "The objectId you want to delete",
+                        "in": "query",
+                        "name": "project_name",
+                        "description": "project_name",
                         "required": true,
                         "type": "string"
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "{string} delete success!"
+                        "description": "{\"status\": 200}"
                     },
                     "403": {
-                        "description": "objectId is empty"
+                        "description": "body is empty"
                     }
                 }
             }
@@ -355,6 +329,12 @@
                 "ID": {
                     "type": "string"
                 },
+                "PACKAGE_URL": {
+                    "type": "string"
+                },
+                "SONAR_URL": {
+                    "type": "string"
+                },
                 "_index": {
                     "type": "string"
                 },
@@ -362,9 +342,6 @@
                     "type": "string"
                 },
                 "current": {
-                    "type": "string"
-                },
-                "next": {
                     "type": "string"
                 },
                 "result": {
@@ -393,12 +370,16 @@
     },
     "tags": [
         {
-            "name": "object",
-            "description": "Operations about object\n"
-        },
-        {
             "name": "dc",
             "description": "Operations about devclouds\n"
+        },
+        {
+            "name": "index",
+            "description": "Operations about index\n"
+        },
+        {
+            "name": "task",
+            "description": "Operations about object\n"
         }
     ]
 }

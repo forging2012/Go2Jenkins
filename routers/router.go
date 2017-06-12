@@ -12,21 +12,31 @@ import (
 
 func init() {
 	ns := beego.NewNamespace("/v1",
-		beego.NSNamespace("/object",
-			beego.NSInclude(
-				&controllers.ObjectController{},
-			),
-		),
 		/*
-		beego.NSNamespace("/user",
-			beego.NSInclude(
-				&controllers.UserController{},
+			beego.NSNamespace("/object",
+				beego.NSInclude(
+					&controllers.ObjectController{},
+				),
 			),
-		),
+			beego.NSNamespace("/user",
+				beego.NSInclude(
+					&controllers.UserController{},
+				),
+			),
 		*/
 		beego.NSNamespace("/dc",
 			beego.NSInclude(
 				&controllers.DevCloudController{},
+			),
+		),
+		beego.NSNamespace("/index",
+			beego.NSInclude(
+				&controllers.IndexController{},
+			),
+		),
+		beego.NSNamespace("/task",
+			beego.NSInclude(
+				&controllers.TaskController{},
 			),
 		),
 	)

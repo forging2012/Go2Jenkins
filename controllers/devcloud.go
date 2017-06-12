@@ -1,7 +1,7 @@
 package controllers
 
 import (
-	"strings"
+	//"strings"
 	"devcloud/models"
 
 	"github.com/astaxie/beego"
@@ -14,19 +14,10 @@ type DevCloudController struct {
 }
 
 func init() {
-	logs.SetLogger(logs.AdapterFile,`{"filename":"test.log","level":7}`)
-}
-
-func access(d *DevCloudController) (string,bool){ 
-	clientip := d.Ctx.Input.IP()
-	allow_ip := beego.AppConfig.String("allow_ip")
-	s_allow_ip := strings.Split(allow_ip,";")
-	for _,ip := range s_allow_ip {
-		if (clientip == ip){ 
-			return clientip,true
-		}
-	}
-	return clientip,false
+	beego.SetLogFuncCall(false)
+	beego.BeeLogger.DelLogger("console")
+	//logs.SetLogger(logs.AdapterConsole,`{"level":7,"color":false}`)
+	logs.SetLogger(logs.AdapterFile,`{"filename":"beego.log","level":7}`)
 }
 
 // @Title DevCloud Create Project
@@ -38,17 +29,12 @@ func access(d *DevCloudController) (string,bool){
 // @Failure 50X app has error
 // @router /create [get]
 func (d *DevCloudController) Create() {
-	clientip,isaccess := access(d)
 	var ret map[string]string
-	if isaccess {
-        	ProjectName := d.GetString("project_name")
-        	SvnUrl := d.GetString("svn_url")
-        	ret = models.GetCreateResult(ProjectName,SvnUrl)
-		logs.Info(clientip+" create "+ProjectName+" "+SvnUrl)
-	} else {
-		ret = map[string]string{"status": "403"}
-		logs.Warn(clientip+" is not allow to access")
-	}
+	clientip := d.Ctx.Input.IP()
+        ProjectName := d.GetString("project_name")
+        SvnUrl := d.GetString("svn_url")
+        ret = models.GetCreateResult(ProjectName,SvnUrl)
+	logs.Info(clientip+" create "+ProjectName+" "+SvnUrl)
         d.Data["json"] = ret
         d.ServeJSON()
 }
@@ -61,16 +47,11 @@ func (d *DevCloudController) Create() {
 // @Failure 50X app has error
 // @router /checkout [get]
 func (d *DevCloudController) CheckOut() {
-	clientip,isaccess := access(d)
 	var ret map[string]string
-	if isaccess {
-        	ProjectName := d.GetString("project_name")
-        	ret = models.GetCheckOutResult(ProjectName)
-		logs.Info(clientip+" checkout "+ProjectName)
-	} else {
-		ret = map[string]string{"status": "403"}
-		logs.Warn(clientip+" is not allow to access")
-	}
+	clientip := d.Ctx.Input.IP()
+        ProjectName := d.GetString("project_name")
+        ret = models.GetCheckOutResult(ProjectName)
+	logs.Info(clientip+" checkout "+ProjectName)
         d.Data["json"] = ret
         d.ServeJSON()
 }
@@ -83,16 +64,11 @@ func (d *DevCloudController) CheckOut() {
 // @Failure 50X app has error
 // @router /codecheck [get]
 func (d *DevCloudController) CodeCheck() {
-	clientip,isaccess := access(d)
         var ret map[string]string
-        if isaccess {
-        	ProjectName := d.GetString("project_name")
-        	ret = models.GetCodeCheckResult(ProjectName)
-		logs.Info(clientip+" codecheck "+ProjectName)
-	} else {
-		ret = map[string]string{"status": "403"}
-		logs.Warn(clientip+" is not allow to access")
-	}
+	clientip := d.Ctx.Input.IP()
+        ProjectName := d.GetString("project_name")
+        ret = models.GetCodeCheckResult(ProjectName)
+	logs.Info(clientip+" codecheck "+ProjectName)
         d.Data["json"] = ret
         d.ServeJSON()
 }
@@ -105,40 +81,32 @@ func (d *DevCloudController) CodeCheck() {
 // @Failure 50X app has error
 // @router /compile [get]
 func (d *DevCloudController) Compile() {
-	clientip,isaccess := access(d)
         var ret map[string]string
-        if isaccess {
-        	ProjectName := d.GetString("project_name")
-        	ret = models.GetCompileResult(ProjectName)
-		logs.Info(clientip+" compile "+ProjectName)
-	} else {
-                ret = map[string]string{"status": "403"}
-		logs.Warn(clientip+" is not allow to access")
-        }
+	clientip := d.Ctx.Input.IP()
+        ProjectName := d.GetString("project_name")
+        ret = models.GetCompileResult(ProjectName)
+	logs.Info(clientip+" compile "+ProjectName)
         d.Data["json"] = ret
         d.ServeJSON()
 }
 
 // @Title DevCloud Pack Project
 // @Description Pack project
-// @Param       project_name             query    string  true            "project_name"
-// @Param       version             query    string  true            "version"
+// @Param       project_name             query    string  true            "project name"
+// @Param       version             query    string  true            "project version"
+// @Param       isE             query    string  true            "是否紧急发布Y/N"
 // @Success 200 {object} models.Result
 // @Success 403 forbidden
 // @Failure 50X app has error
 // @router /pack [get]
 func (d *DevCloudController) Pack() {
-	clientip,isaccess := access(d)
 	var ret map[string]string
-	if isaccess {
-		ProjectName := d.GetString("project_name")
-		Version := d.GetString("version")
-		ret = models.GetPackResult(ProjectName,Version)
-		logs.Info(clientip+" pack "+ProjectName)
-	} else {
-                ret = map[string]string{"status": "403"}
-		logs.Warn(clientip+" is not allow to access")
-        }
+	clientip := d.Ctx.Input.IP()
+	ProjectName := d.GetString("project_name")
+	Version := d.GetString("version")
+	IsE := d.GetString("isE")
+	ret = models.GetPackResult(ProjectName,Version,IsE)
+	logs.Info(clientip+" pack "+ProjectName)
 	d.Data["json"] = ret
 	d.ServeJSON()
 }

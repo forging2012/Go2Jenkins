@@ -22,6 +22,13 @@ func init() {
 
 	beego.GlobalControllerRouter["devcloud/controllers:DevCloudController"] = append(beego.GlobalControllerRouter["devcloud/controllers:DevCloudController"],
 		beego.ControllerComments{
+			Method: "CodeCheck",
+			Router: `/codecheck`,
+			AllowHTTPMethods: []string{"get"},
+			Params: nil})
+
+	beego.GlobalControllerRouter["devcloud/controllers:DevCloudController"] = append(beego.GlobalControllerRouter["devcloud/controllers:DevCloudController"],
+		beego.ControllerComments{
 			Method: "Compile",
 			Router: `/compile`,
 			AllowHTTPMethods: []string{"get"},
@@ -31,6 +38,13 @@ func init() {
 		beego.ControllerComments{
 			Method: "Pack",
 			Router: `/pack`,
+			AllowHTTPMethods: []string{"get"},
+			Params: nil})
+
+	beego.GlobalControllerRouter["devcloud/controllers:IndexController"] = append(beego.GlobalControllerRouter["devcloud/controllers:IndexController"],
+		beego.ControllerComments{
+			Method: "Get",
+			Router: `/`,
 			AllowHTTPMethods: []string{"get"},
 			Params: nil})
 
@@ -67,6 +81,27 @@ func init() {
 			Method: "Delete",
 			Router: `/:objectId`,
 			AllowHTTPMethods: []string{"delete"},
+			Params: nil})
+
+	beego.GlobalControllerRouter["devcloud/controllers:TaskController"] = append(beego.GlobalControllerRouter["devcloud/controllers:TaskController"],
+		beego.ControllerComments{
+			Method: "Add",
+			Router: `/add`,
+			AllowHTTPMethods: []string{"get"},
+			Params: nil})
+
+	beego.GlobalControllerRouter["devcloud/controllers:TaskController"] = append(beego.GlobalControllerRouter["devcloud/controllers:TaskController"],
+		beego.ControllerComments{
+			Method: "Del",
+			Router: `/del`,
+			AllowHTTPMethods: []string{"get"},
+			Params: nil})
+
+	beego.GlobalControllerRouter["devcloud/controllers:TaskController"] = append(beego.GlobalControllerRouter["devcloud/controllers:TaskController"],
+		beego.ControllerComments{
+			Method: "Delay",
+			Router: `/delay`,
+			AllowHTTPMethods: []string{"get"},
 			Params: nil})
 
 	beego.GlobalControllerRouter["devcloud/controllers:UserController"] = append(beego.GlobalControllerRouter["devcloud/controllers:UserController"],
