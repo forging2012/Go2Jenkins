@@ -3,15 +3,34 @@ package models
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/toolbox"
 )
 
-func AddTask(name, spec string) {
+func doFunc(name, tasklist string) {
+	tk := strings.Split(tasklist, ";")
+	for _, taskname := range tk {
+		fmt.Println("taskname", taskname)
+		switch {
+		case taskname == "checkout":
+			GetCheckOutResult(name)
+		case taskname == "codecheck":
+			GetCodeCheckResult(name)
+		case taskname == "compile":
+			GetCompileResult(name)
+		case taskname == "pack":
+			GetPackResult(name, "1.0", "N")
+		}
+	}
+}
+
+func AddTask(name, spec, tasklist string) {
 	if name != "monitor" {
-		f := func() error { fmt.Println(name + " task " + time.Now().Format("2006-01-02 15:04:05")); return nil }
+		//f := func() error { fmt.Println(name + " task " + time.Now().Format("2006-01-02 15:04:05")); return nil }
+		f := func() error { doFunc(name, tasklist); return nil }
 		tk := toolbox.NewTask(name, spec, f)
 		toolbox.AddTask(name, tk)
 		tk.SetNext(time.Now())
