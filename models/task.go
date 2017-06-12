@@ -7,22 +7,43 @@ import (
 	"time"
 
 	"github.com/astaxie/beego"
+	"github.com/astaxie/beego/logs"
 	"github.com/astaxie/beego/toolbox"
 )
 
 func doFunc(name, tasklist string) {
 	tk := strings.Split(tasklist, ";")
+	isexit := false
 	for _, taskname := range tk {
-		fmt.Println("taskname", taskname)
+		//fmt.Println("taskname", taskname)
 		switch {
 		case taskname == "checkout":
-			GetCheckOutResult(name)
+			result := GetCheckOutResult(name)["result"]
+			if strings.Contains(result, "exit status") {
+				isexit = true
+			}
+			writeEs("checkout", result, "test")
 		case taskname == "codecheck":
-			GetCodeCheckResult(name)
+			result := GetCodeCheckResult(name)["result"]
+			if strings.Contains(result, "exit status") {
+				isexit = true
+			}
+			writeEs("codecheck", result, "test")
 		case taskname == "compile":
-			GetCompileResult(name)
+			result := GetCompileResult(name)["result"]
+			if strings.Contains(result, "exit status") {
+				isexit = true
+			}
+			writeEs("compile", result, "test")
 		case taskname == "pack":
-			GetPackResult(name, "1.0", "N")
+			result := GetPackResult(name, "1.0", "N")["result"]
+			if strings.Contains(result, "exit status") {
+				writeEs("pack", result, "test")
+			}
+			writeEs("pack", result, "test")
+		}
+		if isexit {
+			break
 		}
 	}
 }
@@ -34,12 +55,17 @@ func AddTask(name, spec, tasklist string) {
 		tk := toolbox.NewTask(name, spec, f)
 		toolbox.AddTask(name, tk)
 		tk.SetNext(time.Now())
+		//每个任务的执行task列表存在TaskList
+		TaskList = make(map[string]string)
+		TaskList[name] = tasklist
+		logs.Info("add task " + name + " " + tasklist)
 	}
 }
 
 func DelTask(name string) {
 	if name != "monitor" {
 		toolbox.DeleteTask(name)
+		logs.Info("del task " + name)
 	}
 }
 
@@ -59,9 +85,12 @@ func DelayTask(name string) {
 
 //加载配置文件task
 func addTask(ci CronInfo) {
-	f := func() error { fmt.Println(ci.Project, time.Now()); return nil }
+	f := func() error { doFunc(ci.Project, ci.TaskList); return nil }
 	tk := toolbox.NewTask(ci.Project, ci.Spec, f)
 	toolbox.AddTask(ci.Project, tk)
+	//每个任务的执行task列表存在TaskList
+	TaskList = make(map[string]string)
+	TaskList[ci.Project] = ci.TaskList
 }
 
 //增加监控，每10s执行一次
@@ -77,20 +106,23 @@ func monitor() {
 	tasklist := toolbox.AdminTaskList
 	var croninfos []*CronInfo
 	for taskname, tasker := range tasklist {
-		ci := &CronInfo{taskname, tasker.GetSpec()}
+		ci := &CronInfo{taskname, tasker.GetSpec(), TaskList[taskname]}
 		croninfos = append(croninfos, ci)
 	}
 	//切片序列化为json
 	if cronconfig, err := json.Marshal(&croninfos); err != nil {
 		panic(err)
 	} else {
-		fmt.Println(string(cronconfig))
+		logs.Info(string(cronconfig))
 	}
 }
 
+var TaskList map[string]string
+
 type CronInfo struct {
-	Project string `json:"project"`
-	Spec    string `json:"spec"`
+	Project  string `json:"project"`
+	Spec     string `json:"spec"`
+	TaskList string `json:"tasklist"`
 }
 
 func loadCron4Config() {
@@ -99,10 +131,12 @@ func loadCron4Config() {
 	if cronconig != "" {
 		//json反序列化可以存储struct的切片中
 		if err := json.Unmarshal([]byte(cronconig), &croninfos); err != nil {
-			fmt.Println(err)
+			logs.Error("load cron from config has err" + err.Error())
 		}
 		for _, croninfo := range croninfos {
 			addTask(croninfo)
+			logs.Info("load cron from config")
+			logs.Info(croninfo)
 		}
 	}
 }

@@ -41,16 +41,3 @@ func (t *TaskController) Del() {
 	t.Data["json"] = map[string]int{"status": 200}
 	t.ServeJSON()
 }
-
-// @Title DelTask
-// @Description delete task
-// @Param       project_name            query   string  true            "project_name"
-// @Success 200 {"status": 200}
-// @Failure 403 body is empty
-// @router /delay [get]
-func (t *TaskController) Delay() {
-	project_name := t.GetString("project_name")
-	models.DelayTask(project_name)
-	t.Data["json"] = map[string]int{"status": 200}
-	t.ServeJSON()
-}

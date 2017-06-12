@@ -5,8 +5,8 @@ import (
 	"strings"
 
 	"github.com/astaxie/beego"
-	//"github.com/astaxie/beego/logs"
 	"github.com/astaxie/beego/context"
+	"github.com/astaxie/beego/logs"
 	"github.com/astaxie/beego/toolbox"
 )
 
@@ -29,6 +29,10 @@ var FilterIp = func(ctx *context.Context) {
 }
 
 func main() {
+	beego.SetLogFuncCall(false)
+	beego.BeeLogger.DelLogger("console")
+	//logs.SetLogger(logs.AdapterConsole, `{"level":7,"color":false}`)
+	logs.SetLogger(logs.AdapterFile, `{"filename":"./logs/beego.log","level":7}`)
 	beego.InsertFilter("/v1/dc/*", beego.BeforeExec, FilterIp)
 	beego.BConfig.WebConfig.DirectoryIndex = true
 	beego.BConfig.WebConfig.StaticDir["/swagger"] = "swagger"
