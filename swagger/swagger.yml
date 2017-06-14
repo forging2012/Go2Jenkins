@@ -144,33 +144,26 @@ paths:
         required: true
         type: string
       - in: query
+        name: task_name
+        description: task_name
+        required: true
+        type: string
+      - in: query
         name: spec
         description: task time
         required: true
         type: string
-      responses:
-        "200":
-          description: '{"status": 200}'
-        "403":
-          description: body is empty
-  /task/del:
-    get:
-      tags:
-      - task
-      description: delete task
-      operationId: TaskController.DelTask
-      parameters:
       - in: query
-        name: project_name
-        description: project_name
+        name: tasklist
+        description: task list:checkout;codecheck;...;
         required: true
         type: string
       responses:
         "200":
-          description: '{"status": 200}'
+          description: '{"status": 200,"task_in_estype":"crontask", "task_in_esid":project_name}'
         "403":
           description: body is empty
-  /task/delay:
+  /task/del:
     get:
       tags:
       - task

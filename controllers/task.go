@@ -15,17 +15,19 @@ type TaskController struct {
 // @Title AddTask
 // @Description add task
 // @Param	project_name		query 	string	true		"project_name"
+// @Param	task_name		query 	string	true		"task_name"
 // @Param	spec		query 	string	true		"task time"
-// @Param	tasklist		query 	string	true		"task list"
-// @Success 200 {"status": 200}
+// @Param	tasklist		query 	string	true		"task list:checkout;codecheck;...;"
+// @Success 200 {"status": 200,"task_in_estype":"crontask", "task_in_esid":project_name}
 // @Failure 403 body is empty
 // @router /add [get]
 func (t *TaskController) Add() {
 	project_name := t.GetString("project_name")
+	task_name := t.GetString("task_name")
 	spec := t.GetString("spec")
 	tasklist := t.GetString("tasklist")
-	models.AddTask(project_name, spec, tasklist)
-	t.Data["json"] = map[string]int{"status": 200}
+	models.AddTask(project_name, task_name, spec, tasklist)
+	t.Data["json"] = map[string]interface{}{"status": 200, "task_in_estype": "crontask", "task_in_esid": project_name + "-" + task_name}
 	t.ServeJSON()
 }
 

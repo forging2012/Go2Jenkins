@@ -97,13 +97,6 @@ func init() {
 			AllowHTTPMethods: []string{"get"},
 			Params: nil})
 
-	beego.GlobalControllerRouter["devcloud/controllers:TaskController"] = append(beego.GlobalControllerRouter["devcloud/controllers:TaskController"],
-		beego.ControllerComments{
-			Method: "Delay",
-			Router: `/delay`,
-			AllowHTTPMethods: []string{"get"},
-			Params: nil})
-
 	beego.GlobalControllerRouter["devcloud/controllers:UserController"] = append(beego.GlobalControllerRouter["devcloud/controllers:UserController"],
 		beego.ControllerComments{
 			Method: "Post",

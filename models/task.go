@@ -3,6 +3,7 @@ package models
 import (
 	"encoding/json"
 	"fmt"
+	//"reflect"
 	"strings"
 	"time"
 
@@ -11,68 +12,150 @@ import (
 	"github.com/astaxie/beego/toolbox"
 )
 
-func doFunc(name, tasklist string) {
-	tk := strings.Split(tasklist, ";")
+const (
+	EsCronConfig = "croninfo"
+)
+
+//save [project+"|"+taskname]tasklist
+var BeegoTaskNameToTaskList map[string]string
+
+type CronInfo struct {
+	Project  string `json:projectname`
+	TaskName string `json:"taskname"`
+	Spec     string `json:"spec"`
+	TaskList string `json:"tasklist"`
+}
+
+func loadCronFromConfig() {
+	var croninfos []CronInfo
+
+	configfile_cron := beego.AppConfig.String("cron")
+	if configfile_cron != "" {
+		//json反序列化可以存储struct的切片中
+		if err := json.Unmarshal([]byte(configfile_cron), &croninfos); err != nil {
+			logs.Error("load cron from configfile has err" + err.Error())
+		}
+		for _, croninfo := range croninfos {
+			addTask(croninfo)
+			logs.Info("load cron from configfile")
+			logs.Info(croninfo)
+		}
+	}
+}
+
+func loadCronFromEs() {
+	var croninfos []CronInfo
+
+	// es /devclouds_logs/croninfo/croninfo
+	es_ret, err := search("EsCronConfig", "EsCronConfig")
+	if err != nil {
+		logs.Error("search task from es has err " + err.Error())
+	} else {
+		es_cron := es_ret.Source["msg"]
+		if es_cron != nil {
+			//json反序列化可以存储struct的切片中
+			if err := json.Unmarshal([]byte(es_cron.(string)), &croninfos); err != nil {
+				logs.Error("load cron from es has err" + err.Error())
+			}
+			for _, croninfo := range croninfos {
+				addTask(croninfo)
+				logs.Info("load cron from es")
+				logs.Info(croninfo)
+			}
+		}
+	}
+}
+
+//加载配置文件task
+func addTask(ci CronInfo) {
+	f := func() error { doFunc(ci.Project, ci.TaskName, ci.TaskList); return nil }
+	beego_taskname := ci.Project + "-" + ci.TaskName
+	tk := toolbox.NewTask(beego_taskname, ci.Spec, f)
+	toolbox.AddTask(beego_taskname, tk)
+	//每个任务的执行task列表存在TaskList
+	BeegoTaskNameToTaskList = make(map[string]string)
+	BeegoTaskNameToTaskList[beego_taskname] = ci.TaskList
+}
+
+type CiResult struct {
+	CHECKOUT  string
+	CODECHECK string
+	COMPILE   string
+	PACK      string
+}
+
+func doFunc(project, taskname, tasklist string) {
+	var ret CiResult
+	tks := strings.Split(tasklist, ";")
 	isexit := false
-	for _, taskname := range tk {
-		//fmt.Println("taskname", taskname)
+	for _, tk := range tks {
 		switch {
-		case taskname == "checkout":
-			result := GetCheckOutResult(name)["result"]
+		case tk == "checkout":
+			result := GetCheckOutResult(project)["result"]
 			if strings.Contains(result, "exit status") {
 				isexit = true
 			}
-			writeEs("checkout", result, "test")
-		case taskname == "codecheck":
-			result := GetCodeCheckResult(name)["result"]
+			ret.CHECKOUT = result
+		case tk == "codecheck":
+			result := GetCodeCheckResult(project)["result"]
 			if strings.Contains(result, "exit status") {
 				isexit = true
 			}
-			writeEs("codecheck", result, "test")
-		case taskname == "compile":
-			result := GetCompileResult(name)["result"]
+			ret.CODECHECK = result
+		case tk == "compile":
+			result := GetCompileResult(project)["result"]
 			if strings.Contains(result, "exit status") {
 				isexit = true
 			}
-			writeEs("compile", result, "test")
-		case taskname == "pack":
-			result := GetPackResult(name, "1.0", "N")["result"]
+			ret.COMPILE = result
+		case tk == "pack":
+			result := GetPackResult(project, "1.0", "N")["result"]
 			if strings.Contains(result, "exit status") {
-				writeEs("pack", result, "test")
+				isexit = true
 			}
-			writeEs("pack", result, "test")
+			ret.PACK = result
 		}
 		if isexit {
 			break
+			//fmt.Println(isexit)
 		}
 	}
+	if rets, err := json.Marshal(&ret); err != nil {
+		panic(err)
+	} else {
+		logs.Info(string(rets))
+		// /devclouds_logs/crontask/$project-$taskname
+		beego_taskname := project + "-" + taskname
+		logs.Info(writeEs("crontask", beego_taskname, string(rets)))
+	}
 }
 
-func AddTask(name, spec, tasklist string) {
-	if name != "monitor" {
+func AddTask(project, taskname, spec, tasklist string) {
+	beego_taskname := project + "-" + taskname
+	if beego_taskname != "monitor" {
 		//f := func() error { fmt.Println(name + " task " + time.Now().Format("2006-01-02 15:04:05")); return nil }
-		f := func() error { doFunc(name, tasklist); return nil }
-		tk := toolbox.NewTask(name, spec, f)
-		toolbox.AddTask(name, tk)
+		f := func() error { doFunc(project, taskname, tasklist); return nil }
+		tk := toolbox.NewTask(beego_taskname, spec, f)
+		toolbox.AddTask(beego_taskname, tk)
 		tk.SetNext(time.Now())
 		//每个任务的执行task列表存在TaskList
-		TaskList = make(map[string]string)
-		TaskList[name] = tasklist
-		logs.Info("add task " + name + " " + tasklist)
+		BeegoTaskNameToTaskList = make(map[string]string)
+		BeegoTaskNameToTaskList[beego_taskname] = tasklist
+		logs.Info("add task:Project " + project + " TaskName " + taskname + " TaskList " + tasklist)
 	}
 }
 
-func DelTask(name string) {
-	if name != "monitor" {
-		toolbox.DeleteTask(name)
-		logs.Info("del task " + name)
+func DelTask(taskname string) {
+	if taskname != "monitor" {
+		toolbox.DeleteTask(taskname)
+		logs.Info("del task " + taskname)
 	}
 }
 
-func DelayTask(name string) {
-	tasklist := toolbox.AdminTaskList
-	for taskname, tasker := range tasklist {
-		if taskname == name {
+func DelayTask(taskname string) {
+	admintasklist := toolbox.AdminTaskList
+	for beego_taskname, tasker := range admintasklist {
+		if beego_taskname == taskname {
 			next := tasker.GetNext()
 			fmt.Println("before", tasker.GetNext())
 			mm, _ := time.ParseDuration("10m")
@@ -81,16 +164,6 @@ func DelayTask(name string) {
 			fmt.Println("after", tasker.GetNext())
 		}
 	}
-}
-
-//加载配置文件task
-func addTask(ci CronInfo) {
-	f := func() error { doFunc(ci.Project, ci.TaskList); return nil }
-	tk := toolbox.NewTask(ci.Project, ci.Spec, f)
-	toolbox.AddTask(ci.Project, tk)
-	//每个任务的执行task列表存在TaskList
-	TaskList = make(map[string]string)
-	TaskList[ci.Project] = ci.TaskList
 }
 
 //增加监控，每10s执行一次
@@ -103,45 +176,27 @@ func addTask4Monitor() {
 //监控所有task列表
 func monitor() {
 	//var tasklist map[string]toolbox.Tasker
-	tasklist := toolbox.AdminTaskList
+	admintasklist := toolbox.AdminTaskList
 	var croninfos []*CronInfo
-	for taskname, tasker := range tasklist {
-		ci := &CronInfo{taskname, tasker.GetSpec(), TaskList[taskname]}
-		croninfos = append(croninfos, ci)
+	for beego_taskname, tasker := range admintasklist {
+		if beego_taskname != "monitor" {
+			project := strings.Split(beego_taskname, "-")[0]
+			taskname := strings.Split(beego_taskname, "-")[1]
+			ci := &CronInfo{project, taskname, tasker.GetSpec(), BeegoTaskNameToTaskList[beego_taskname]}
+			croninfos = append(croninfos, ci)
+		}
 	}
 	//切片序列化为json
 	if cronconfig, err := json.Marshal(&croninfos); err != nil {
 		panic(err)
 	} else {
-		logs.Info(string(cronconfig))
-	}
-}
-
-var TaskList map[string]string
-
-type CronInfo struct {
-	Project  string `json:"project"`
-	Spec     string `json:"spec"`
-	TaskList string `json:"tasklist"`
-}
-
-func loadCron4Config() {
-	cronconig := beego.AppConfig.String("cron")
-	var croninfos []CronInfo
-	if cronconig != "" {
-		//json反序列化可以存储struct的切片中
-		if err := json.Unmarshal([]byte(cronconig), &croninfos); err != nil {
-			logs.Error("load cron from config has err" + err.Error())
-		}
-		for _, croninfo := range croninfos {
-			addTask(croninfo)
-			logs.Info("load cron from config")
-			logs.Info(croninfo)
-		}
+		logs.Info("croninfos: " + string(cronconfig))
+		writeEs(EsCronConfig, EsCronConfig, string(cronconfig))
 	}
 }
 
 func init() {
-	loadCron4Config()
+	loadCronFromConfig()
+	loadCronFromEs()
 	addTask4Monitor()
 }

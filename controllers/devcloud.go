@@ -13,13 +13,6 @@ type DevCloudController struct {
 	beego.Controller
 }
 
-func init() {
-	beego.SetLogFuncCall(false)
-	beego.BeeLogger.DelLogger("console")
-	//logs.SetLogger(logs.AdapterConsole,`{"level":7,"color":false}`)
-	logs.SetLogger(logs.AdapterFile,`{"filename":"beego.log","level":7}`)
-}
-
 // @Title DevCloud Create Project
 // @Description Create project
 // @Param       project_name             query    string  true            "project name"
@@ -31,12 +24,12 @@ func init() {
 func (d *DevCloudController) Create() {
 	var ret map[string]string
 	clientip := d.Ctx.Input.IP()
-        ProjectName := d.GetString("project_name")
-        SvnUrl := d.GetString("svn_url")
-        ret = models.GetCreateResult(ProjectName,SvnUrl)
-	logs.Info(clientip+" create "+ProjectName+" "+SvnUrl)
-        d.Data["json"] = ret
-        d.ServeJSON()
+	ProjectName := d.GetString("project_name")
+	SvnUrl := d.GetString("svn_url")
+	ret = models.GetCreateResult(ProjectName, SvnUrl)
+	logs.Info(clientip + " create " + ProjectName + " " + SvnUrl)
+	d.Data["json"] = ret
+	d.ServeJSON()
 }
 
 // @Title DevCloud checkout code
@@ -49,11 +42,11 @@ func (d *DevCloudController) Create() {
 func (d *DevCloudController) CheckOut() {
 	var ret map[string]string
 	clientip := d.Ctx.Input.IP()
-        ProjectName := d.GetString("project_name")
-        ret = models.GetCheckOutResult(ProjectName)
-	logs.Info(clientip+" checkout "+ProjectName)
-        d.Data["json"] = ret
-        d.ServeJSON()
+	ProjectName := d.GetString("project_name")
+	ret = models.GetCheckOutResult(ProjectName)
+	logs.Info(clientip + " checkout " + ProjectName)
+	d.Data["json"] = ret
+	d.ServeJSON()
 }
 
 // @Title DevCloud code check
@@ -64,13 +57,13 @@ func (d *DevCloudController) CheckOut() {
 // @Failure 50X app has error
 // @router /codecheck [get]
 func (d *DevCloudController) CodeCheck() {
-        var ret map[string]string
+	var ret map[string]string
 	clientip := d.Ctx.Input.IP()
-        ProjectName := d.GetString("project_name")
-        ret = models.GetCodeCheckResult(ProjectName)
-	logs.Info(clientip+" codecheck "+ProjectName)
-        d.Data["json"] = ret
-        d.ServeJSON()
+	ProjectName := d.GetString("project_name")
+	ret = models.GetCodeCheckResult(ProjectName)
+	logs.Info(clientip + " codecheck " + ProjectName)
+	d.Data["json"] = ret
+	d.ServeJSON()
 }
 
 // @Title DevCloud compile code
@@ -81,13 +74,13 @@ func (d *DevCloudController) CodeCheck() {
 // @Failure 50X app has error
 // @router /compile [get]
 func (d *DevCloudController) Compile() {
-        var ret map[string]string
+	var ret map[string]string
 	clientip := d.Ctx.Input.IP()
-        ProjectName := d.GetString("project_name")
-        ret = models.GetCompileResult(ProjectName)
-	logs.Info(clientip+" compile "+ProjectName)
-        d.Data["json"] = ret
-        d.ServeJSON()
+	ProjectName := d.GetString("project_name")
+	ret = models.GetCompileResult(ProjectName)
+	logs.Info(clientip + " compile " + ProjectName)
+	d.Data["json"] = ret
+	d.ServeJSON()
 }
 
 // @Title DevCloud Pack Project
@@ -105,8 +98,8 @@ func (d *DevCloudController) Pack() {
 	ProjectName := d.GetString("project_name")
 	Version := d.GetString("version")
 	IsE := d.GetString("isE")
-	ret = models.GetPackResult(ProjectName,Version,IsE)
-	logs.Info(clientip+" pack "+ProjectName)
+	ret = models.GetPackResult(ProjectName, Version, IsE)
+	logs.Info(clientip + " pack " + ProjectName)
 	d.Data["json"] = ret
 	d.ServeJSON()
 }
