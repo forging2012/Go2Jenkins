@@ -174,6 +174,7 @@ func addTask4Monitor() {
 }
 
 //监控所有task列表
+//获得的任务列表会写入es
 func monitor() {
 	//var tasklist map[string]toolbox.Tasker
 	admintasklist := toolbox.AdminTaskList
@@ -196,7 +197,7 @@ func monitor() {
 }
 
 func init() {
-	loadCronFromConfig()
+	//loadCronFromConfig()
 	loadCronFromEs()
 	addTask4Monitor()
 }
