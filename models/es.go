@@ -3,6 +3,7 @@ package models
 import (
 	"crypto/md5"
 	"encoding/hex"
+	"io/ioutil"
 	"net/url"
 	"time"
 
@@ -53,4 +54,22 @@ func MD5(text string) string {
 	ctx := md5.New()
 	ctx.Write([]byte(text))
 	return hex.EncodeToString(ctx.Sum(nil))
+}
+
+func Write(filename, text string) bool {
+	data := []byte(text)
+	err := ioutil.WriteFile(filename, data, 0644)
+	if err != nil {
+		//panic(err)
+		return false
+	}
+	return true
+}
+
+func Read(filename string) (string, error) {
+	data, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return "", err
+	}
+	return string(data), nil
 }

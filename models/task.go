@@ -13,7 +13,8 @@ import (
 )
 
 const (
-	EsCronConfig = "croninfo"
+	EsCronInfo   = "croninfo"
+	FileCronInfo = "./conf/croninfo"
 )
 
 var BeegoTaskNameToTaskLists []map[string]string
@@ -49,9 +50,9 @@ func loadCronFromEs() {
 	var croninfos []CronInfo
 
 	// es /devclouds_logs/croninfo/croninfo
-	es_ret, err := search("EsCronConfig", "EsCronConfig")
+	es_ret, err := search("EsCronInfo", "EsCronInfo")
 	if err != nil {
-		logs.Error("search task from es has err " + err.Error())
+		logs.Error("load task from es has err " + err.Error())
 	} else {
 		es_cron := es_ret.Source["msg"]
 		if es_cron != nil {
@@ -67,6 +68,22 @@ func loadCronFromEs() {
 		}
 	}
 }
+func loadCronFromFile() {
+	var croninfos []CronInfo
+	file_ret, err := Read(FileCronInfo)
+	if err != nil {
+		logs.Error("load task from file has err " + err.Error())
+	} else {
+		if err := json.Unmarshal([]byte(file_ret), &croninfos); err != nil {
+			logs.Error("load cron from file has err" + err.Error())
+		}
+		for _, croninfo := range croninfos {
+			addTask(croninfo)
+			logs.Info("load cron from file")
+			logs.Info(croninfo)
+		}
+	}
+}
 
 //加载配置文件task
 func addTask(ci CronInfo) {
@@ -74,7 +91,7 @@ func addTask(ci CronInfo) {
 	beego_taskname := ci.Project + "-" + ci.TaskName
 	tk := toolbox.NewTask(beego_taskname, ci.Spec, f)
 	toolbox.AddTask(beego_taskname, tk)
-	//每个任务的执行task列表存在TaskList
+	//每个任务的执行task列表存在BeegoTaskNameToTaskList
 	BeegoTaskNameToTaskList = make(map[string]string)
 	BeegoTaskNameToTaskList[beego_taskname] = ci.TaskList
 	BeegoTaskNameToTaskLists = append(BeegoTaskNameToTaskLists, BeegoTaskNameToTaskList)
@@ -141,13 +158,13 @@ func AddTask(project, taskname, spec, tasklist string) {
 		tk := toolbox.NewTask(beego_taskname, spec, f)
 		toolbox.AddTask(beego_taskname, tk)
 		tk.SetNext(time.Now())
-		//每个任务的执行task列表存在TaskList
+		//每个任务的执行task列表存在BeegoTaskNameToTaskList
 		BeegoTaskNameToTaskList = make(map[string]string)
 		BeegoTaskNameToTaskList[beego_taskname] = tasklist
 		//fmt.Println(BeegoTaskNameToTaskList)
 		BeegoTaskNameToTaskLists = append(BeegoTaskNameToTaskLists, BeegoTaskNameToTaskList)
 		//fmt.Println(BeegoTaskNameToTaskLists)
-		logs.Info("add task:Project " + project + " TaskName " + taskname + " TaskList " + tasklist)
+		logs.Info("add task:Project " + project + " TaskName " + taskname + " Spec " + spec + " TaskList " + tasklist)
 	}
 }
 
@@ -172,6 +189,38 @@ func DelayTask(taskname string) {
 	}
 }
 
+type CronAllInfo struct {
+	Project     string
+	Taskname    string
+	Spec        string
+	Tasklist    string
+	PreRunTime  string
+	NextRunTime string
+}
+
+func GetAllTask() []*CronAllInfo {
+	//var tasklist map[string]toolbox.Tasker
+	admintasklist := toolbox.AdminTaskList
+	var cronallinfos []*CronAllInfo
+	for beego_taskname, tasker := range admintasklist {
+		if beego_taskname != "monitor" {
+			var ci *CronAllInfo
+			project := strings.Split(beego_taskname, "-")[0]
+			taskname := strings.Split(beego_taskname, "-")[1]
+			for _, beegoTaskNameToTaskList := range BeegoTaskNameToTaskLists {
+				//fmt.Println(beegoTaskNameToTaskList)
+				tasklist, isexist := beegoTaskNameToTaskList[beego_taskname]
+				if isexist {
+					ci = &CronAllInfo{project, taskname, tasker.GetSpec(), tasklist, tasker.GetPrev().Format("2006-01-02 15:04:05"), tasker.GetNext().Format("2006-01-02 15:04:05")}
+				}
+			}
+			//fmt.Println(ci)
+			cronallinfos = append(cronallinfos, ci)
+		}
+	}
+	return cronallinfos
+}
+
 //增加监控，每10s执行一次
 func addTask4Monitor() {
 	f := func() error { monitor(); return nil }
@@ -192,8 +241,8 @@ func monitor() {
 			taskname := strings.Split(beego_taskname, "-")[1]
 			for _, beegoTaskNameToTaskList := range BeegoTaskNameToTaskLists {
 				//fmt.Println(beegoTaskNameToTaskList)
-				tasklist := beegoTaskNameToTaskList[beego_taskname]
-				if tasklist != "" {
+				tasklist, isexist := beegoTaskNameToTaskList[beego_taskname]
+				if isexist {
 					ci = &CronInfo{project, taskname, tasker.GetSpec(), tasklist}
 				}
 			}
@@ -206,12 +255,20 @@ func monitor() {
 		panic(err)
 	} else {
 		logs.Info("croninfos: " + string(cronconfig))
-		writeEs(EsCronConfig, EsCronConfig, string(cronconfig))
+		//写入本地文件
+		Write(FileCronInfo, string(cronconfig))
+		//写入es
+		//writeEs(EsCronInfo, EsCronInfo, string(cronconfig))
 	}
 }
 
 func init() {
+	beego.SetLogFuncCall(false)
+	beego.BeeLogger.DelLogger("console")
+	//logs.SetLogger(logs.AdapterConsole, `{"level":7,"color":false}`)
+	logs.SetLogger(logs.AdapterFile, `{"filename":"./logs/beego.log","level":7}`)
 	//loadCronFromConfig()
-	loadCronFromEs()
+	//loadCronFromEs()
+	loadCronFromFile()
 	addTask4Monitor()
 }
