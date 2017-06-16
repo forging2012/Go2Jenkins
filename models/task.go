@@ -16,6 +16,8 @@ const (
 	EsCronConfig = "croninfo"
 )
 
+var BeegoTaskNameToTaskLists []map[string]string
+
 //save [project+"|"+taskname]tasklist
 var BeegoTaskNameToTaskList map[string]string
 
@@ -75,6 +77,7 @@ func addTask(ci CronInfo) {
 	//每个任务的执行task列表存在TaskList
 	BeegoTaskNameToTaskList = make(map[string]string)
 	BeegoTaskNameToTaskList[beego_taskname] = ci.TaskList
+	BeegoTaskNameToTaskLists = append(BeegoTaskNameToTaskLists, BeegoTaskNameToTaskList)
 }
 
 type CiResult struct {
@@ -141,6 +144,9 @@ func AddTask(project, taskname, spec, tasklist string) {
 		//每个任务的执行task列表存在TaskList
 		BeegoTaskNameToTaskList = make(map[string]string)
 		BeegoTaskNameToTaskList[beego_taskname] = tasklist
+		//fmt.Println(BeegoTaskNameToTaskList)
+		BeegoTaskNameToTaskLists = append(BeegoTaskNameToTaskLists, BeegoTaskNameToTaskList)
+		//fmt.Println(BeegoTaskNameToTaskLists)
 		logs.Info("add task:Project " + project + " TaskName " + taskname + " TaskList " + tasklist)
 	}
 }
@@ -181,9 +187,17 @@ func monitor() {
 	var croninfos []*CronInfo
 	for beego_taskname, tasker := range admintasklist {
 		if beego_taskname != "monitor" {
+			var ci *CronInfo
 			project := strings.Split(beego_taskname, "-")[0]
 			taskname := strings.Split(beego_taskname, "-")[1]
-			ci := &CronInfo{project, taskname, tasker.GetSpec(), BeegoTaskNameToTaskList[beego_taskname]}
+			for _, beegoTaskNameToTaskList := range BeegoTaskNameToTaskLists {
+				//fmt.Println(beegoTaskNameToTaskList)
+				tasklist := beegoTaskNameToTaskList[beego_taskname]
+				if tasklist != "" {
+					ci = &CronInfo{project, taskname, tasker.GetSpec(), tasklist}
+				}
+			}
+			//fmt.Println(ci)
 			croninfos = append(croninfos, ci)
 		}
 	}
