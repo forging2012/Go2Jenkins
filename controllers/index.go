@@ -14,6 +14,6 @@ type IndexController struct {
 // @Success 200 hello api
 // @router / [get]
 func (i *IndexController) Get() {
-	i.Data["json"] = "hello api"
+	i.Data["json"] = map[string]string{"msg": "hello api"}
 	i.ServeJSON()
 }
