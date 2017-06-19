@@ -217,29 +217,22 @@
                     },
                     {
                         "in": "query",
-                        "name": "task_name",
-                        "description": "task_name",
-                        "required": true,
-                        "type": "string"
-                    },
-                    {
-                        "in": "query",
                         "name": "spec",
-                        "description": "task time",
+                        "description": "秒 分钟 小时 天 月 星期",
                         "required": true,
                         "type": "string"
                     },
                     {
                         "in": "query",
                         "name": "tasklist",
-                        "description": "task list:checkout;codecheck;...;",
+                        "description": "从checkout;codecheck;compile;pack中组合,多个以分号隔开",
                         "required": true,
                         "type": "string"
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "{\"status\": 200,\"task_in_estype\":\"crontask\", \"task_in_esid\":project_name}"
+                        "description": "{\"status\": 200,\"task_in_estype\":\"crontask\", \"task_in_esid\":id}"
                     },
                     "403": {
                         "description": "body is empty"
@@ -257,8 +250,8 @@
                 "parameters": [
                     {
                         "in": "query",
-                        "name": "project_name",
-                        "description": "project_name",
+                        "name": "taskid",
+                        "description": "task id",
                         "required": true,
                         "type": "string"
                     }
@@ -272,9 +265,31 @@
                     }
                 }
             }
+        },
+        "/task/getall": {
+            "get": {
+                "tags": [
+                    "task"
+                ],
+                "description": "Get all task",
+                "operationId": "TaskController.Get all Task",
+                "responses": {
+                    "200": {
+                        "schema": {
+                            "$ref": "#/definitions/.CronAllInfo"
+                        }
+                    },
+                    "403": {
+                        "description": "body is empty"
+                    }
+                }
+            }
         }
     },
     "definitions": {
+        ".CronAllInfo": {
+            "type": "object"
+        },
         "models.Object": {
             "title": "Object",
             "type": "object",
@@ -367,7 +382,7 @@
         },
         {
             "name": "task",
-            "description": "Operations about object\n"
+            "description": "Operations about task\n"
         }
     ]
 }

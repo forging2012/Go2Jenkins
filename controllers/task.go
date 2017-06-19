@@ -8,7 +8,7 @@ import (
 	"github.com/astaxie/beego"
 )
 
-// Operations about object
+// Operations about task
 type TaskController struct {
 	beego.Controller
 }

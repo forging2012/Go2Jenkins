@@ -22,13 +22,6 @@ var BeegoTaskNameToTaskLists []map[string]string
 //save [project+"|"+taskname]tasklist
 var BeegoTaskNameToTaskList map[string]string
 
-type CronInfo struct {
-	Project  string `json:projectname`
-	TaskName string `json:"taskname"`
-	Spec     string `json:"spec"`
-	TaskList string `json:"tasklist"`
-}
-
 func loadCronFromConfig() {
 	var croninfos []CronInfo
 
@@ -39,13 +32,12 @@ func loadCronFromConfig() {
 			logs.Error("load cron from configfile has err" + err.Error())
 		}
 		for _, croninfo := range croninfos {
-			addTask(croninfo)
+			AddTask(croninfo.Project, croninfo.TaskName, croninfo.Spec, croninfo.TaskList)
 			logs.Info("load cron from configfile")
 			logs.Info(croninfo)
 		}
 	}
 }
-
 func loadCronFromEs() {
 	var croninfos []CronInfo
 
@@ -61,7 +53,7 @@ func loadCronFromEs() {
 				logs.Error("load cron from es has err" + err.Error())
 			}
 			for _, croninfo := range croninfos {
-				addTask(croninfo)
+				AddTask(croninfo.Project, croninfo.TaskName, croninfo.Spec, croninfo.TaskList)
 				logs.Info("load cron from es")
 				logs.Info(croninfo)
 			}
@@ -78,23 +70,11 @@ func loadCronFromFile() {
 			logs.Error("load cron from file has err" + err.Error())
 		}
 		for _, croninfo := range croninfos {
-			addTask(croninfo)
+			AddTask(croninfo.Project, croninfo.TaskName, croninfo.Spec, croninfo.TaskList)
 			logs.Info("load cron from file")
 			logs.Info(croninfo)
 		}
 	}
-}
-
-//加载配置文件task
-func addTask(ci CronInfo) {
-	f := func() error { doFunc(ci.Project, ci.TaskName, ci.TaskList); return nil }
-	beego_taskname := ci.Project + "-" + ci.TaskName
-	tk := toolbox.NewTask(beego_taskname, ci.Spec, f)
-	toolbox.AddTask(beego_taskname, tk)
-	//每个任务的执行task列表存在BeegoTaskNameToTaskList
-	BeegoTaskNameToTaskList = make(map[string]string)
-	BeegoTaskNameToTaskList[beego_taskname] = ci.TaskList
-	BeegoTaskNameToTaskLists = append(BeegoTaskNameToTaskLists, BeegoTaskNameToTaskList)
 }
 
 type CiResult struct {
@@ -150,6 +130,7 @@ func doFunc(project, taskname, tasklist string) {
 	}
 }
 
+//重启系统，所有定时任务的下一次时间重新定义
 func AddTask(project, taskname, spec, tasklist string) {
 	beego_taskname := project + "-" + taskname
 	if beego_taskname != "monitor" {
@@ -161,9 +142,7 @@ func AddTask(project, taskname, spec, tasklist string) {
 		//每个任务的执行task列表存在BeegoTaskNameToTaskList
 		BeegoTaskNameToTaskList = make(map[string]string)
 		BeegoTaskNameToTaskList[beego_taskname] = tasklist
-		//fmt.Println(BeegoTaskNameToTaskList)
 		BeegoTaskNameToTaskLists = append(BeegoTaskNameToTaskLists, BeegoTaskNameToTaskList)
-		//fmt.Println(BeegoTaskNameToTaskLists)
 		logs.Info("add task:Project " + project + " TaskName " + taskname + " Spec " + spec + " TaskList " + tasklist)
 	}
 }
@@ -189,48 +168,18 @@ func DelayTask(taskname string) {
 	}
 }
 
-type CronAllInfo struct {
+type CronInfo struct {
 	Project     string
-	Taskname    string
+	TaskName    string
 	Spec        string
-	Tasklist    string
+	TaskList    string
 	PreRunTime  string
 	NextRunTime string
 }
 
-func GetAllTask() []*CronAllInfo {
-	//var tasklist map[string]toolbox.Tasker
-	admintasklist := toolbox.AdminTaskList
-	var cronallinfos []*CronAllInfo
-	for beego_taskname, tasker := range admintasklist {
-		if beego_taskname != "monitor" {
-			var ci *CronAllInfo
-			project := strings.Split(beego_taskname, "-")[0]
-			taskname := strings.Split(beego_taskname, "-")[1]
-			for _, beegoTaskNameToTaskList := range BeegoTaskNameToTaskLists {
-				//fmt.Println(beegoTaskNameToTaskList)
-				tasklist, isexist := beegoTaskNameToTaskList[beego_taskname]
-				if isexist {
-					ci = &CronAllInfo{project, taskname, tasker.GetSpec(), tasklist, tasker.GetPrev().Format("2006-01-02 15:04:05"), tasker.GetNext().Format("2006-01-02 15:04:05")}
-				}
-			}
-			//fmt.Println(ci)
-			cronallinfos = append(cronallinfos, ci)
-		}
-	}
-	return cronallinfos
-}
-
-//增加监控，每10s执行一次
-func addTask4Monitor() {
-	f := func() error { monitor(); return nil }
-	tk := toolbox.NewTask("monitor", "*/10 * * * * *", f)
-	toolbox.AddTask("monitor", tk)
-}
-
-//监控所有task列表
-//获得的任务列表会写入es
-func monitor() {
+//获取定时任务完整的信息，包括上一步执行时间和下一步执行时间
+//但是在重启的时候，没有加载执行时间
+func GetAllTask() []*CronInfo {
 	//var tasklist map[string]toolbox.Tasker
 	admintasklist := toolbox.AdminTaskList
 	var croninfos []*CronInfo
@@ -243,22 +192,35 @@ func monitor() {
 				//fmt.Println(beegoTaskNameToTaskList)
 				tasklist, isexist := beegoTaskNameToTaskList[beego_taskname]
 				if isexist {
-					ci = &CronInfo{project, taskname, tasker.GetSpec(), tasklist}
+					ci = &CronInfo{project, taskname, tasker.GetSpec(), tasklist, tasker.GetPrev().Format("2006-01-02 15:04:05"), tasker.GetNext().Format("2006-01-02 15:04:05")}
 				}
 			}
 			//fmt.Println(ci)
 			croninfos = append(croninfos, ci)
 		}
 	}
+	return croninfos
+}
+
+//增加监控，每10s执行一次
+func addTask4Monitor() {
+	f := func() error { monitor(); return nil }
+	tk := toolbox.NewTask("monitor", "*/10 * * * * *", f)
+	toolbox.AddTask("monitor", tk)
+}
+
+//定时将任务信息写入到文件中
+func monitor() {
+	croninfo := GetAllTask()
 	//切片序列化为json
-	if cronconfig, err := json.Marshal(&croninfos); err != nil {
+	if croninfos, err := json.Marshal(&croninfo); err != nil {
 		panic(err)
 	} else {
-		logs.Info("croninfos: " + string(cronconfig))
+		logs.Info("croninfos: " + string(croninfos))
 		//写入本地文件
-		Write(FileCronInfo, string(cronconfig))
+		Write(FileCronInfo, string(croninfos))
 		//写入es
-		//writeEs(EsCronInfo, EsCronInfo, string(cronconfig))
+		//writeEs(EsCronInfo, EsCronInfo, string(croninfos))
 	}
 }
 
