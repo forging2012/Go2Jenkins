@@ -47,7 +47,7 @@ func (t *TaskController) Del() {
 
 // @Title Get all Task
 // @Description Get all task
-// @Success 200 {object} models.CronAllInfo
+// @Success 200 {object} models.CronInfo
 // @Failure 403 body is empty
 // @router /getall [get]
 func (t *TaskController) GetALL() {
