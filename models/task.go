@@ -32,9 +32,8 @@ func loadCronFromConfig() {
 			logs.Error("load cron from configfile has err" + err.Error())
 		}
 		for _, croninfo := range croninfos {
-			AddTask(croninfo.Project, croninfo.TaskName, croninfo.Spec, croninfo.TaskList)
 			logs.Info("load cron from configfile")
-			logs.Info(croninfo)
+			AddTask(croninfo.Project, croninfo.TaskName, croninfo.Spec, croninfo.TaskList)
 		}
 	}
 }
@@ -53,9 +52,8 @@ func loadCronFromEs() {
 				logs.Error("load cron from es has err" + err.Error())
 			}
 			for _, croninfo := range croninfos {
-				AddTask(croninfo.Project, croninfo.TaskName, croninfo.Spec, croninfo.TaskList)
 				logs.Info("load cron from es")
-				logs.Info(croninfo)
+				AddTask(croninfo.Project, croninfo.TaskName, croninfo.Spec, croninfo.TaskList)
 			}
 		}
 	}
@@ -70,9 +68,8 @@ func loadCronFromFile() {
 			logs.Error("load cron from file has err" + err.Error())
 		}
 		for _, croninfo := range croninfos {
-			AddTask(croninfo.Project, croninfo.TaskName, croninfo.Spec, croninfo.TaskList)
 			logs.Info("load cron from file")
-			logs.Info(croninfo)
+			AddTask(croninfo.Project, croninfo.TaskName, croninfo.Spec, croninfo.TaskList)
 		}
 	}
 }
@@ -82,6 +79,7 @@ type CiResult struct {
 	CODECHECK string
 	COMPILE   string
 	PACK      string
+	Error     string
 }
 
 func doFunc(project, taskname, tasklist string) {
@@ -89,31 +87,37 @@ func doFunc(project, taskname, tasklist string) {
 	tks := strings.Split(tasklist, ";")
 	isexit := false
 	for _, tk := range tks {
+		tk_name := strings.Split(tk, "|")[0]
 		switch {
-		case tk == "checkout":
+		case tk_name == "checkout":
 			result := GetCheckOutResult(project)["result"]
 			if strings.Contains(result, "exit status") {
 				isexit = true
 			}
 			ret.CHECKOUT = result
-		case tk == "codecheck":
+		case tk_name == "codecheck":
 			result := GetCodeCheckResult(project)["result"]
 			if strings.Contains(result, "exit status") {
 				isexit = true
 			}
 			ret.CODECHECK = result
-		case tk == "compile":
-			result := GetCompileResult(project)["result"]
+		case tk_name == "compile":
+			jdk_version := strings.Split(tk, "|")[1]
+			result := GetCompileResult(project, jdk_version)["result"]
 			if strings.Contains(result, "exit status") {
 				isexit = true
 			}
 			ret.COMPILE = result
-		case tk == "pack":
-			result := GetPackResult(project, "1.0", "N")["result"]
+		case tk_name == "pack":
+			version := strings.Split(tk, "|")[1]
+			result := GetPackResult(project, version, "N")["result"]
 			if strings.Contains(result, "exit status") {
 				isexit = true
 			}
 			ret.PACK = result
+		default:
+			ret.Error = "Project: " + project + " TaskName: " + taskname + " TaskList: " + tasklist + " has error"
+			isexit = true
 		}
 		if isexit {
 			break
@@ -123,10 +127,10 @@ func doFunc(project, taskname, tasklist string) {
 	if rets, err := json.Marshal(&ret); err != nil {
 		panic(err)
 	} else {
-		logs.Info(string(rets))
-		// /devclouds_logs/crontask/$project-$taskname
 		beego_taskname := project + "-" + taskname
-		logs.Info(writeEs("crontask", beego_taskname, string(rets)))
+		logs.Info("TaskResult: " + beego_taskname + " " + string(rets))
+		// /devclouds_logs/crontask/$project-$taskname
+		writeEs("crontask", beego_taskname, string(rets))
 	}
 }
 
@@ -143,14 +147,14 @@ func AddTask(project, taskname, spec, tasklist string) {
 		BeegoTaskNameToTaskList = make(map[string]string)
 		BeegoTaskNameToTaskList[beego_taskname] = tasklist
 		BeegoTaskNameToTaskLists = append(BeegoTaskNameToTaskLists, BeegoTaskNameToTaskList)
-		logs.Info("add task:Project " + project + " TaskName " + taskname + " Spec " + spec + " TaskList " + tasklist)
+		logs.Info("AddTask:Project " + project + " TaskName " + taskname + " Spec " + spec + " TaskList " + tasklist)
 	}
 }
 
 func DelTask(taskname string) {
 	if taskname != "monitor" {
 		toolbox.DeleteTask(taskname)
-		logs.Info("del task " + taskname)
+		logs.Info("Del Task " + taskname)
 	}
 }
 
@@ -216,7 +220,7 @@ func monitor() {
 	if croninfos, err := json.Marshal(&croninfo); err != nil {
 		panic(err)
 	} else {
-		logs.Info("croninfos: " + string(croninfos))
+		logs.Info("CronInfo: " + string(croninfos))
 		//写入本地文件
 		Write(FileCronInfo, string(croninfos))
 		//写入es

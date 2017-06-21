@@ -148,10 +148,10 @@ func GetCodeCheckResult(project_name string) (resp map[string]string) {
 	return
 }
 
-func GetCompileResult(project_name string) (resp map[string]string) {
+func GetCompileResult(project_name, jdk_version string) (resp map[string]string) {
 	resp = make(map[string]string)
 	var ret string
-	out, err := exec.Command("/bin/bash", beego.AppConfig.String("compile"), project_name).Output()
+	out, err := exec.Command("/bin/bash", beego.AppConfig.String("compile"), project_name, jdk_version).Output()
 	if err != nil {
 		ret = string(out) + "|" + err.Error()
 		resp["current"] = "N"

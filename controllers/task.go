@@ -17,7 +17,7 @@ type TaskController struct {
 // @Description add task
 // @Param	project_name		query 	string	true		"project_name"
 // @Param	spec		query 	string	true		"秒 分钟 小时 天 月 星期"
-// @Param	tasklist		query 	string	true		"从checkout;codecheck;compile;pack中组合,多个以分号隔开"
+// @Param	tasklist		query 	string	true		"从checkout;codecheck;compile|jdk_version;pack|project_version中组合,多个以分号隔开"
 // @Success 200 {"status": 200,"task_in_estype":"crontask", "task_in_esid":id}
 // @Failure 403 body is empty
 // @router /add [get]

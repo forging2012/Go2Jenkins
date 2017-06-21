@@ -86,6 +86,13 @@
                         "description": "project name",
                         "required": true,
                         "type": "string"
+                    },
+                    {
+                        "in": "query",
+                        "name": "jdk_version",
+                        "description": "jdk version {1.5 1.6 1.7 1.8}",
+                        "required": true,
+                        "type": "string"
                     }
                 ],
                 "responses": {
@@ -225,7 +232,7 @@
                     {
                         "in": "query",
                         "name": "tasklist",
-                        "description": "从checkout;codecheck;compile;pack中组合,多个以分号隔开",
+                        "description": "从checkout;codecheck;compile|jdk_version;pack|project_version中组合,多个以分号隔开",
                         "required": true,
                         "type": "string"
                     }
@@ -276,7 +283,7 @@
                 "responses": {
                     "200": {
                         "schema": {
-                            "$ref": "#/definitions/.CronAllInfo"
+                            "$ref": "#/definitions/models.CronInfo"
                         }
                     },
                     "403": {
@@ -287,8 +294,29 @@
         }
     },
     "definitions": {
-        ".CronAllInfo": {
-            "type": "object"
+        "models.CronInfo": {
+            "title": "CronInfo",
+            "type": "object",
+            "properties": {
+                "NextRunTime": {
+                    "type": "string"
+                },
+                "PreRunTime": {
+                    "type": "string"
+                },
+                "Project": {
+                    "type": "string"
+                },
+                "Spec": {
+                    "type": "string"
+                },
+                "TaskList": {
+                    "type": "string"
+                },
+                "TaskName": {
+                    "type": "string"
+                }
+            }
         },
         "models.Object": {
             "title": "Object",

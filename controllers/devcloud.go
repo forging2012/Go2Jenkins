@@ -69,6 +69,7 @@ func (d *DevCloudController) CodeCheck() {
 // @Title DevCloud compile code
 // @Description compile code
 // @Param       project_name             query    string  true            "project name"
+// @Param       jdk_version             query    string  true            "jdk version {1.5 1.6 1.7 1.8}"
 // @Success 200 {object} models.Result
 // @Success 403 forbidden
 // @Failure 50X app has error
@@ -77,7 +78,8 @@ func (d *DevCloudController) Compile() {
 	var ret map[string]string
 	clientip := d.Ctx.Input.IP()
 	ProjectName := d.GetString("project_name")
-	ret = models.GetCompileResult(ProjectName)
+	JdkVersion := d.GetString("jdk_version")
+	ret = models.GetCompileResult(ProjectName, JdkVersion)
 	logs.Info(clientip + " compile " + ProjectName)
 	d.Data["json"] = ret
 	d.ServeJSON()
