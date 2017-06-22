@@ -220,7 +220,9 @@ func monitor() {
 	if croninfos, err := json.Marshal(&croninfo); err != nil {
 		panic(err)
 	} else {
-		logs.Info("CronInfo: " + string(croninfos))
+		if string(croninfos) != "null" {
+			logs.Info("CronInfo: " + string(croninfos))
+		}
 		//写入本地文件
 		Write(FileCronInfo, string(croninfos))
 		//写入es

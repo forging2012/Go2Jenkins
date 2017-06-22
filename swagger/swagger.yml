@@ -20,13 +20,13 @@ paths:
         required: true
         type: string
       responses:
-        50X:
-          description: app has error
         "200":
           schema:
             $ref: '#/definitions/models.Result'
         "403":
-          description: forbidden
+          description: Forbidden
+        "10016":
+          description: Miss required parameter
   /dc/codecheck:
     get:
       tags:
@@ -40,13 +40,13 @@ paths:
         required: true
         type: string
       responses:
-        50X:
-          description: app has error
         "200":
           schema:
             $ref: '#/definitions/models.Result'
         "403":
-          description: forbidden
+          description: Forbidden
+        "10016":
+          description: Miss required parameter
   /dc/compile:
     get:
       tags:
@@ -65,13 +65,13 @@ paths:
         required: true
         type: string
       responses:
-        50X:
-          description: app has error
         "200":
           schema:
             $ref: '#/definitions/models.Result'
         "403":
-          description: forbidden
+          description: Forbidden
+        "10016":
+          description: Miss required parameter
   /dc/create:
     get:
       tags:
@@ -90,13 +90,13 @@ paths:
         required: true
         type: string
       responses:
-        50X:
-          description: app has error
         "200":
           schema:
             $ref: '#/definitions/models.Result'
         "403":
-          description: forbidden
+          description: Forbidden
+        "10016":
+          description: Miss required parameter
   /dc/pack:
     get:
       tags:
@@ -120,13 +120,13 @@ paths:
         required: true
         type: string
       responses:
-        50X:
-          description: app has error
         "200":
           schema:
             $ref: '#/definitions/models.Result'
         "403":
-          description: forbidden
+          description: Forbidden
+        "10016":
+          description: Miss required parameter
   /index/:
     get:
       tags:
@@ -162,7 +162,9 @@ paths:
         "200":
           description: '{"status": 200,"task_in_estype":"crontask", "task_in_esid":id}'
         "403":
-          description: body is empty
+          description: Forbidden
+        "10016":
+          description: Miss required parameter
   /task/del:
     get:
       tags:
@@ -179,7 +181,9 @@ paths:
         "200":
           description: '{"status": 200}'
         "403":
-          description: body is empty
+          description: Forbidden
+        "10016":
+          description: Miss required parameter
   /task/getall:
     get:
       tags:
@@ -191,7 +195,7 @@ paths:
           schema:
             $ref: '#/definitions/models.CronInfo'
         "403":
-          description: body is empty
+          description: Forbidden
 definitions:
   models.CronInfo:
     title: CronInfo

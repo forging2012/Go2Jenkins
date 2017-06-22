@@ -54,8 +54,8 @@ func writeEs(opt, id string, ret interface{}) (string, string, string, error) {
 	return response.Index, response.Type, response.ID, nil
 }
 */
-func GetCreateResult(project_name, svn_url string) (resp map[string]string) {
-	resp = make(map[string]string)
+func GetCreateResult(project_name, svn_url string) (resp map[string]interface{}) {
+	resp = make(map[string]interface{})
 	var ret string
 	out, err := exec.Command("/bin/bash", beego.AppConfig.String("create"), project_name, svn_url).Output()
 	if err != nil {

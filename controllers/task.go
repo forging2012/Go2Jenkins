@@ -2,10 +2,11 @@ package controllers
 
 import (
 	"devcloud/models"
+	"strings"
 	"time"
-	//"encoding/json"
 
 	"github.com/astaxie/beego"
+	"github.com/astaxie/beego/logs"
 )
 
 // Operations about task
@@ -19,16 +20,47 @@ type TaskController struct {
 // @Param	spec		query 	string	true		"秒 分钟 小时 天 月 星期"
 // @Param	tasklist		query 	string	true		"从checkout;codecheck;compile|jdk_version;pack|project_version中组合,多个以分号隔开"
 // @Success 200 {"status": 200,"task_in_estype":"crontask", "task_in_esid":id}
-// @Failure 403 body is empty
+// @Failure 10016 Miss required parameter
+// @Failure 403 Forbidden
 // @router /add [get]
 func (t *TaskController) Add() {
 	project_name := t.GetString("project_name")
-	//task_name := t.GetString("task_name")
 	task_name := models.MD5(time.Now().Format("2006-01-02 15:04:05"))
 	spec := t.GetString("spec")
 	tasklist := t.GetString("tasklist")
-	models.AddTask(project_name, task_name, spec, tasklist)
-	t.Data["json"] = map[string]interface{}{"status": 200, "task_in_estype": "crontask", "task_in_esid": project_name + "-" + task_name}
+	resp := make(map[string]interface{})
+	isok := true
+	if project_name != "" && spec != "" && tasklist != "" {
+		tks := strings.Split(tasklist, ";")
+		for _, tk := range tks {
+			tk_name := strings.Split(tk, "|")[0]
+			if tk_name == "compile" {
+				num := len(strings.Split(tk, "|"))
+				if num == 1 {
+					resp = map[string]interface{}{"status": 10016, "error": "Miss required parameter"}
+					isok = false
+				}
+			}
+			if tk_name == "pack" {
+				num := len(strings.Split(tk, "|"))
+				if num == 1 {
+					resp = map[string]interface{}{"status": 10016, "error": "Miss required parameter"}
+					isok = false
+				}
+			}
+		}
+		if isok {
+			logs.Info(t.Ctx.Input.IP() + " Add Task " + project_name + " " + task_name + " " + spec + " " + tasklist)
+			models.AddTask(project_name, task_name, spec, tasklist)
+			resp = map[string]interface{}{"status": 200, "task_in_estype": "crontask", "task_in_esid": project_name + "-" + task_name}
+		} else {
+			resp = map[string]interface{}{"status": 10016, "error": "Miss required parameter"}
+		}
+
+	} else {
+		resp = map[string]interface{}{"status": 10016, "error": "Miss required parameter"}
+	}
+	t.Data["json"] = resp
 	t.ServeJSON()
 }
 
@@ -36,19 +68,26 @@ func (t *TaskController) Add() {
 // @Description delete task
 // @Param	taskid		query 	string	true		"task id"
 // @Success 200 {"status": 200}
-// @Failure 403 body is empty
+// @Failure 10016 Miss required parameter
+// @Failure 403 Forbidden
 // @router /del [get]
 func (t *TaskController) Del() {
-	taskid := t.GetString("taskid")
-	models.DelTask(taskid)
-	t.Data["json"] = map[string]int{"status": 200}
+	resp := make(map[string]interface{})
+	if taskid := t.GetString("taskid"); taskid != "" {
+		logs.Info(t.Ctx.Input.IP() + " Del Task " + taskid)
+		models.DelTask(taskid)
+		resp = map[string]interface{}{"status": 200}
+	} else {
+		resp = map[string]interface{}{"status": 10016, "error": "Miss required parameter"}
+	}
+	t.Data["json"] = resp
 	t.ServeJSON()
 }
 
 // @Title Get all Task
 // @Description Get all task
 // @Success 200 {object} models.CronInfo
-// @Failure 403 body is empty
+// @Failure 403 Forbidden
 // @router /getall [get]
 func (t *TaskController) GetALL() {
 	ret := models.GetAllTask()

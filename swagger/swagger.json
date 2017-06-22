@@ -27,16 +27,16 @@
                     }
                 ],
                 "responses": {
+                    "10016": {
+                        "description": "Miss required parameter"
+                    },
                     "200": {
                         "schema": {
                             "$ref": "#/definitions/models.Result"
                         }
                     },
                     "403": {
-                        "description": "forbidden"
-                    },
-                    "50X": {
-                        "description": "app has error"
+                        "description": "Forbidden"
                     }
                 }
             }
@@ -58,16 +58,16 @@
                     }
                 ],
                 "responses": {
+                    "10016": {
+                        "description": "Miss required parameter"
+                    },
                     "200": {
                         "schema": {
                             "$ref": "#/definitions/models.Result"
                         }
                     },
                     "403": {
-                        "description": "forbidden"
-                    },
-                    "50X": {
-                        "description": "app has error"
+                        "description": "Forbidden"
                     }
                 }
             }
@@ -96,16 +96,16 @@
                     }
                 ],
                 "responses": {
+                    "10016": {
+                        "description": "Miss required parameter"
+                    },
                     "200": {
                         "schema": {
                             "$ref": "#/definitions/models.Result"
                         }
                     },
                     "403": {
-                        "description": "forbidden"
-                    },
-                    "50X": {
-                        "description": "app has error"
+                        "description": "Forbidden"
                     }
                 }
             }
@@ -134,16 +134,16 @@
                     }
                 ],
                 "responses": {
+                    "10016": {
+                        "description": "Miss required parameter"
+                    },
                     "200": {
                         "schema": {
                             "$ref": "#/definitions/models.Result"
                         }
                     },
                     "403": {
-                        "description": "forbidden"
-                    },
-                    "50X": {
-                        "description": "app has error"
+                        "description": "Forbidden"
                     }
                 }
             }
@@ -179,16 +179,16 @@
                     }
                 ],
                 "responses": {
+                    "10016": {
+                        "description": "Miss required parameter"
+                    },
                     "200": {
                         "schema": {
                             "$ref": "#/definitions/models.Result"
                         }
                     },
                     "403": {
-                        "description": "forbidden"
-                    },
-                    "50X": {
-                        "description": "app has error"
+                        "description": "Forbidden"
                     }
                 }
             }
@@ -238,11 +238,14 @@
                     }
                 ],
                 "responses": {
+                    "10016": {
+                        "description": "Miss required parameter"
+                    },
                     "200": {
                         "description": "{\"status\": 200,\"task_in_estype\":\"crontask\", \"task_in_esid\":id}"
                     },
                     "403": {
-                        "description": "body is empty"
+                        "description": "Forbidden"
                     }
                 }
             }
@@ -264,11 +267,14 @@
                     }
                 ],
                 "responses": {
+                    "10016": {
+                        "description": "Miss required parameter"
+                    },
                     "200": {
                         "description": "{\"status\": 200}"
                     },
                     "403": {
-                        "description": "body is empty"
+                        "description": "Forbidden"
                     }
                 }
             }
@@ -287,7 +293,7 @@
                         }
                     },
                     "403": {
-                        "description": "body is empty"
+                        "description": "Forbidden"
                     }
                 }
             }

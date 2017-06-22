@@ -18,17 +18,21 @@ type DevCloudController struct {
 // @Param       project_name             query    string  true            "project name"
 // @Param       svn_url             query    string  true            "project svn"
 // @Success 200 {object} models.Result
-// @Success 403 forbidden
-// @Failure 50X app has error
+// @Failure 10016 Miss required parameter
+// @Failure 403 Forbidden
 // @router /create [get]
 func (d *DevCloudController) Create() {
-	var ret map[string]string
 	clientip := d.Ctx.Input.IP()
 	ProjectName := d.GetString("project_name")
 	SvnUrl := d.GetString("svn_url")
-	ret = models.GetCreateResult(ProjectName, SvnUrl)
-	logs.Info(clientip + " create " + ProjectName + " " + SvnUrl)
-	d.Data["json"] = ret
+	resp := make(map[string]interface{})
+	if ProjectName != "" && SvnUrl != "" {
+		logs.Info(clientip + " create " + ProjectName + " " + SvnUrl)
+		resp = models.GetCreateResult(ProjectName, SvnUrl)
+	} else {
+		resp = map[string]interface{}{"status": 10016, "error": "Miss required parameter"}
+	}
+	d.Data["json"] = resp
 	d.ServeJSON()
 }
 
@@ -36,34 +40,44 @@ func (d *DevCloudController) Create() {
 // @Description checkout code
 // @Param       project_name             query    string  true            "project name"
 // @Success 200 {object} models.Result
-// @Success 403 forbidden
-// @Failure 50X app has error
+// @Failure 10016 Miss required parameter
+// @Failure 403 Forbidden
 // @router /checkout [get]
 func (d *DevCloudController) CheckOut() {
-	var ret map[string]string
-	clientip := d.Ctx.Input.IP()
-	ProjectName := d.GetString("project_name")
-	ret = models.GetCheckOutResult(ProjectName)
-	logs.Info(clientip + " checkout " + ProjectName)
-	d.Data["json"] = ret
-	d.ServeJSON()
+	if ProjectName := d.GetString("project_name"); ProjectName != "" {
+		resp := make(map[string]string)
+		logs.Info(d.Ctx.Input.IP() + " checkout " + ProjectName)
+		resp = models.GetCheckOutResult(ProjectName)
+		d.Data["json"] = resp
+		d.ServeJSON()
+	} else {
+		resp := make(map[string]interface{})
+		resp = map[string]interface{}{"status": 10016, "error": "Miss required parameter"}
+		d.Data["json"] = resp
+		d.ServeJSON()
+	}
 }
 
 // @Title DevCloud code check
 // @Description code check
 // @Param       project_name             query    string  true            "project name"
 // @Success 200 {object} models.Result
-// @Success 403 forbidden
-// @Failure 50X app has error
+// @Failure 10016 Miss required parameter
+// @Failure 403 Forbidden
 // @router /codecheck [get]
 func (d *DevCloudController) CodeCheck() {
-	var ret map[string]string
-	clientip := d.Ctx.Input.IP()
-	ProjectName := d.GetString("project_name")
-	ret = models.GetCodeCheckResult(ProjectName)
-	logs.Info(clientip + " codecheck " + ProjectName)
-	d.Data["json"] = ret
-	d.ServeJSON()
+	if ProjectName := d.GetString("project_name"); ProjectName != "" {
+		resp := make(map[string]string)
+		logs.Info(d.Ctx.Input.IP() + " codecheck " + ProjectName)
+		resp = models.GetCodeCheckResult(ProjectName)
+		d.Data["json"] = resp
+		d.ServeJSON()
+	} else {
+		resp := make(map[string]interface{})
+		resp = map[string]interface{}{"status": 10016, "error": "Miss required parameter"}
+		d.Data["json"] = resp
+		d.ServeJSON()
+	}
 }
 
 // @Title DevCloud compile code
@@ -71,18 +85,25 @@ func (d *DevCloudController) CodeCheck() {
 // @Param       project_name             query    string  true            "project name"
 // @Param       jdk_version             query    string  true            "jdk version {1.5 1.6 1.7 1.8}"
 // @Success 200 {object} models.Result
-// @Success 403 forbidden
-// @Failure 50X app has error
+// @Failure 10016 Miss required parameter
+// @Failure 403 Forbidden
 // @router /compile [get]
 func (d *DevCloudController) Compile() {
-	var ret map[string]string
-	clientip := d.Ctx.Input.IP()
 	ProjectName := d.GetString("project_name")
 	JdkVersion := d.GetString("jdk_version")
-	ret = models.GetCompileResult(ProjectName, JdkVersion)
-	logs.Info(clientip + " compile " + ProjectName)
-	d.Data["json"] = ret
-	d.ServeJSON()
+	if ProjectName != "" && JdkVersion != "" {
+		logs.Info(d.Ctx.Input.IP() + " compile " + ProjectName)
+		resp := make(map[string]string)
+		resp = models.GetCompileResult(ProjectName, JdkVersion)
+		d.Data["json"] = resp
+		d.ServeJSON()
+	} else {
+		resp := make(map[string]interface{})
+		resp = map[string]interface{}{"status": 10016, "error": "Miss required parameter"}
+		d.Data["json"] = resp
+		d.ServeJSON()
+	}
+
 }
 
 // @Title DevCloud Pack Project
@@ -91,17 +112,23 @@ func (d *DevCloudController) Compile() {
 // @Param       version             query    string  true            "project version"
 // @Param       isE             query    string  true            "是否紧急发布Y/N"
 // @Success 200 {object} models.Result
-// @Success 403 forbidden
-// @Failure 50X app has error
+// @Failure 10016 Miss required parameter
+// @Failure 403 Forbidden
 // @router /pack [get]
 func (d *DevCloudController) Pack() {
-	var ret map[string]string
-	clientip := d.Ctx.Input.IP()
 	ProjectName := d.GetString("project_name")
 	Version := d.GetString("version")
 	IsE := d.GetString("isE")
-	ret = models.GetPackResult(ProjectName, Version, IsE)
-	logs.Info(clientip + " pack " + ProjectName)
-	d.Data["json"] = ret
-	d.ServeJSON()
+	if ProjectName != "" && Version != "" && IsE != "" {
+		resp := make(map[string]string)
+		logs.Info(d.Ctx.Input.IP() + " pack " + ProjectName)
+		resp = models.GetPackResult(ProjectName, Version, IsE)
+		d.Data["json"] = resp
+		d.ServeJSON()
+	} else {
+		resp := make(map[string]interface{})
+		resp = map[string]interface{}{"status": 10016, "error": "Miss required parameter"}
+		d.Data["json"] = resp
+		d.ServeJSON()
+	}
 }
