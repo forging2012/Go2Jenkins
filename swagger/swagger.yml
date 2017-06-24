@@ -196,6 +196,44 @@ paths:
             $ref: '#/definitions/models.CronInfo'
         "403":
           description: Forbidden
+  /task/start:
+    get:
+      tags:
+      - task
+      description: start task
+      operationId: TaskController.StartTask
+      parameters:
+      - in: query
+        name: taskid
+        description: task id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: '{"status": 200}'
+        "403":
+          description: Forbidden
+        "10016":
+          description: Miss required parameter
+  /task/stop:
+    get:
+      tags:
+      - task
+      description: stop task
+      operationId: TaskController.StopTask
+      parameters:
+      - in: query
+        name: taskid
+        description: task id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: '{"status": 200}'
+        "403":
+          description: Forbidden
+        "10016":
+          description: Miss required parameter
 definitions:
   models.CronInfo:
     title: CronInfo
@@ -212,6 +250,8 @@ definitions:
       TaskList:
         type: string
       TaskName:
+        type: string
+      TaskStatus:
         type: string
   models.Object:
     title: Object
@@ -252,6 +292,8 @@ definitions:
       SONAR_URL:
         type: string
       current:
+        type: string
+      es_result:
         type: string
       result:
         type: string

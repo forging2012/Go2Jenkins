@@ -297,6 +297,64 @@
                     }
                 }
             }
+        },
+        "/task/start": {
+            "get": {
+                "tags": [
+                    "task"
+                ],
+                "description": "start task",
+                "operationId": "TaskController.StartTask",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "taskid",
+                        "description": "task id",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "10016": {
+                        "description": "Miss required parameter"
+                    },
+                    "200": {
+                        "description": "{\"status\": 200}"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                }
+            }
+        },
+        "/task/stop": {
+            "get": {
+                "tags": [
+                    "task"
+                ],
+                "description": "stop task",
+                "operationId": "TaskController.StopTask",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "taskid",
+                        "description": "task id",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "10016": {
+                        "description": "Miss required parameter"
+                    },
+                    "200": {
+                        "description": "{\"status\": 200}"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -320,6 +378,9 @@
                     "type": "string"
                 },
                 "TaskName": {
+                    "type": "string"
+                },
+                "TaskStatus": {
                     "type": "string"
                 }
             }
@@ -379,6 +440,9 @@
                     "type": "string"
                 },
                 "current": {
+                    "type": "string"
+                },
+                "es_result": {
                     "type": "string"
                 },
                 "result": {

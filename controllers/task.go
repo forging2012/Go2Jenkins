@@ -51,7 +51,7 @@ func (t *TaskController) Add() {
 		}
 		if isok {
 			logs.Info(t.Ctx.Input.IP() + " Add Task " + project_name + " " + task_name + " " + spec + " " + tasklist)
-			models.AddTask(project_name, task_name, spec, tasklist)
+			models.AddTask(project_name, task_name, spec, tasklist, time.Now())
 			resp = map[string]interface{}{"status": 200, "task_in_estype": "crontask", "task_in_esid": project_name + "-" + task_name}
 		} else {
 			resp = map[string]interface{}{"status": 10016, "error": "Miss required parameter"}
@@ -92,5 +92,45 @@ func (t *TaskController) Del() {
 func (t *TaskController) GetALL() {
 	ret := models.GetAllTask()
 	t.Data["json"] = ret
+	t.ServeJSON()
+}
+
+// @Title StopTask
+// @Description stop task
+// @Param	taskid		query 	string	true		"task id"
+// @Success 200 {"status": 200}
+// @Failure 10016 Miss required parameter
+// @Failure 403 Forbidden
+// @router /stop [get]
+func (t *TaskController) Stop() {
+	resp := make(map[string]interface{})
+	if taskid := t.GetString("taskid"); taskid != "" {
+		logs.Info(t.Ctx.Input.IP() + " Stop Task " + taskid)
+		models.StopTask(taskid)
+		resp = map[string]interface{}{"status": 200}
+	} else {
+		resp = map[string]interface{}{"status": 10016, "error": "Miss required parameter"}
+	}
+	t.Data["json"] = resp
+	t.ServeJSON()
+}
+
+// @Title StartTask
+// @Description start task
+// @Param	taskid		query 	string	true		"task id"
+// @Success 200 {"status": 200}
+// @Failure 10016 Miss required parameter
+// @Failure 403 Forbidden
+// @router /start [get]
+func (t *TaskController) Start() {
+	resp := make(map[string]interface{})
+	if taskid := t.GetString("taskid"); taskid != "" {
+		logs.Info(t.Ctx.Input.IP() + " Start Task " + taskid)
+		models.StartTask(taskid)
+		resp = map[string]interface{}{"status": 200}
+	} else {
+		resp = map[string]interface{}{"status": 10016, "error": "Miss required parameter"}
+	}
+	t.Data["json"] = resp
 	t.ServeJSON()
 }

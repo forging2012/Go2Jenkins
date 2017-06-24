@@ -21,6 +21,7 @@ type Result struct {
 	//next        string
 	PACKAGE_URL string
 	SONAR_URL   string
+	es_result string
 }
 
 var resp map[string]string
@@ -70,9 +71,10 @@ func GetCreateResult(project_name, svn_url string) (resp map[string]interface{})
 	//write es
 	Index, Type, Id, err := writeEs("create", "", ret)
 	if err != nil {
-		resp["result"] = ret
+		//resp["result"] = ret
+		//es报错
 		resp["es_result"] = err.Error()
-		return
+		//return
 	}
 	resp["PACKAGE_URL"] = ""
 	resp["SONAR_URL"] = ""
@@ -101,9 +103,9 @@ func GetCheckOutResult(project_name string) (resp map[string]string) {
 	//write es
 	Index, Type, Id, err := writeEs("checkout", "", ret)
 	if err != nil {
-		resp["result"] = ret
+		//resp["result"] = ret
 		resp["es_result"] = err.Error()
-		return
+		//return
 	}
 	resp["PACKAGE_URL"] = ""
 	resp["SONAR_URL"] = ""
@@ -136,9 +138,9 @@ func GetCodeCheckResult(project_name string) (resp map[string]string) {
 	//write es
 	Index, Type, Id, err := writeEs("codecheck", "", ret)
 	if err != nil {
-		resp["result"] = ret
+		//resp["result"] = ret
 		resp["es_result"] = err.Error()
-		return
+		//return
 	}
 	resp["PACKAGE_URL"] = ""
 	resp["_index"] = Index
@@ -165,9 +167,9 @@ func GetCompileResult(project_name, jdk_version string) (resp map[string]string)
 	//write es
 	Index, Type, Id, err := writeEs("compile", "", ret)
 	if err != nil {
-		resp["result"] = ret
+		//resp["result"] = ret
 		resp["es_result"] = err.Error()
-		return
+		//return
 	}
 	resp["PACKAGE_URL"] = ""
 	resp["SONAR_URL"] = ""
@@ -207,9 +209,9 @@ func GetPackResult(project_name, version, isE string) (resp map[string]string) {
 	//write es
 	Index, Type, Id, err := writeEs("pack", "", ret)
 	if err != nil {
-		resp["result"] = ret
+		//resp["result"] = ret
 		resp["es_result"] = err.Error()
-		return
+		//return
 	}
 	resp["SONAR_URL"] = ""
 	resp["_index"] = Index
