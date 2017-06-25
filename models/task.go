@@ -216,9 +216,10 @@ func StopTask(task_id string) {
 	for _, croninfo := range CronInfos {
 		if project == croninfo.Project && taskname == croninfo.TaskName {
 			if task_id != "monitor" {
+				logs.Info("StopTask: " + task_id)
 				toolbox.DeleteTask(task_id)
-			}
-			croninfo.TaskStatus = "N"
+				croninfo.TaskStatus = "N"
+			}	
 		}
 	}
 }
