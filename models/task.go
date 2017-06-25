@@ -180,21 +180,22 @@ func AddTask(project, taskname, spec, tasklist string, next time.Time) {
 	}
 }
 
+//task_id肯定是project-taskname
 func DelTask(task_id string) {
 	project := strings.Split(task_id, "-")[0]
 	taskname := strings.Split(task_id, "-")[1]
 	var croninfos []*CronInfo
-	if task_id != "monitor" {
-		logs.Info("Del Task " + task_id)
-		StopTask(task_id)
-		//利用一个新的切片，将删除的剔除
-		for _, croninfo := range CronInfos {
-			if project != croninfo.Project && taskname != croninfo.TaskName {
-				croninfos = append(croninfos,croninfo)
-			}
+
+	logs.Info("Del Task " + task_id)
+	StopTask(task_id)
+	//利用一个新的切片，将删除的剔除
+	for _, croninfo := range CronInfos {
+		if project != croninfo.Project && taskname != croninfo.TaskName {
+			croninfos = append(croninfos,croninfo)
 		}
-		CronInfos = croninfos
 	}
+	CronInfos = croninfos
+
 }
 
 func StartTask(task_id string) {
@@ -202,10 +203,8 @@ func StartTask(task_id string) {
 	taskname := strings.Split(task_id, "-")[1]
 	for _, croninfo := range CronInfos {
 		if project == croninfo.Project && taskname == croninfo.TaskName {
-			if task_id != "monitor" {
-				logs.Info("StartTask: " + task_id)
-				AddTask(croninfo.Project, croninfo.TaskName, croninfo.Spec, croninfo.TaskList, time.Now())
-			}
+			logs.Info("StartTask: " + task_id)
+			AddTask(croninfo.Project, croninfo.TaskName, croninfo.Spec, croninfo.TaskList, time.Now())			
 		}
 	}
 }
@@ -215,11 +214,9 @@ func StopTask(task_id string) {
 	taskname := strings.Split(task_id, "-")[1]
 	for _, croninfo := range CronInfos {
 		if project == croninfo.Project && taskname == croninfo.TaskName {
-			if task_id != "monitor" {
-				logs.Info("StopTask: " + task_id)
-				toolbox.DeleteTask(task_id)
-				croninfo.TaskStatus = "N"
-			}	
+			logs.Info("StopTask: " + task_id)
+			toolbox.DeleteTask(task_id)
+			croninfo.TaskStatus = "N"				
 		}
 	}
 }

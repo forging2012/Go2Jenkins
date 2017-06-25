@@ -270,6 +270,9 @@
                     "10016": {
                         "description": "Miss required parameter"
                     },
+                    "10017": {
+                        "description": "args is wrong"
+                    },
                     "200": {
                         "description": "{\"status\": 200}"
                     },
@@ -318,6 +321,9 @@
                     "10016": {
                         "description": "Miss required parameter"
                     },
+                    "10017": {
+                        "description": "args is wrong"
+                    },
                     "200": {
                         "description": "{\"status\": 200}"
                     },
@@ -346,6 +352,9 @@
                 "responses": {
                     "10016": {
                         "description": "Miss required parameter"
+                    },
+                    "10017": {
+                        "description": "args is wrong"
                     },
                     "200": {
                         "description": "{\"status\": 200}"

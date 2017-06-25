@@ -184,6 +184,8 @@ paths:
           description: Forbidden
         "10016":
           description: Miss required parameter
+        "10017":
+          description: args is wrong
   /task/getall:
     get:
       tags:
@@ -215,6 +217,8 @@ paths:
           description: Forbidden
         "10016":
           description: Miss required parameter
+        "10017":
+          description: args is wrong
   /task/stop:
     get:
       tags:
@@ -234,6 +238,8 @@ paths:
           description: Forbidden
         "10016":
           description: Miss required parameter
+        "10017":
+          description: args is wrong
 definitions:
   models.CronInfo:
     title: CronInfo

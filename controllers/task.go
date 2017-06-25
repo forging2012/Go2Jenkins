@@ -69,14 +69,19 @@ func (t *TaskController) Add() {
 // @Param	taskid		query 	string	true		"task id"
 // @Success 200 {"status": 200}
 // @Failure 10016 Miss required parameter
+// @Failure 10017 args is wrong
 // @Failure 403 Forbidden
 // @router /del [get]
 func (t *TaskController) Del() {
 	resp := make(map[string]interface{})
 	if taskid := t.GetString("taskid"); taskid != "" {
-		logs.Info(t.Ctx.Input.IP() + " Del Task " + taskid)
-		models.DelTask(taskid)
-		resp = map[string]interface{}{"status": 200}
+		if num := len(strings.Split(taskid, "-")); num == 2 {
+			logs.Info(t.Ctx.Input.IP() + " Del Task " + taskid)
+			models.DelTask(taskid)
+			resp = map[string]interface{}{"status": 200}
+		} else {
+			resp = map[string]interface{}{"status": 10017, "error": "args is wrong"}
+		}
 	} else {
 		resp = map[string]interface{}{"status": 10016, "error": "Miss required parameter"}
 	}
@@ -100,14 +105,19 @@ func (t *TaskController) GetALL() {
 // @Param	taskid		query 	string	true		"task id"
 // @Success 200 {"status": 200}
 // @Failure 10016 Miss required parameter
+// @Failure 10017 args is wrong
 // @Failure 403 Forbidden
 // @router /stop [get]
 func (t *TaskController) Stop() {
 	resp := make(map[string]interface{})
 	if taskid := t.GetString("taskid"); taskid != "" {
-		logs.Info(t.Ctx.Input.IP() + " Stop Task " + taskid)
-		models.StopTask(taskid)
-		resp = map[string]interface{}{"status": 200}
+		if num := len(strings.Split(taskid, "-")); num == 2 {
+			logs.Info(t.Ctx.Input.IP() + " Stop Task " + taskid)
+			models.StopTask(taskid)
+			resp = map[string]interface{}{"status": 200}
+		} else {
+			resp = map[string]interface{}{"status": 10017, "error": "args is wrong"}
+		}
 	} else {
 		resp = map[string]interface{}{"status": 10016, "error": "Miss required parameter"}
 	}
@@ -120,14 +130,19 @@ func (t *TaskController) Stop() {
 // @Param	taskid		query 	string	true		"task id"
 // @Success 200 {"status": 200}
 // @Failure 10016 Miss required parameter
+// @Failure 10017 args is wrong
 // @Failure 403 Forbidden
 // @router /start [get]
 func (t *TaskController) Start() {
 	resp := make(map[string]interface{})
 	if taskid := t.GetString("taskid"); taskid != "" {
-		logs.Info(t.Ctx.Input.IP() + " Start Task " + taskid)
-		models.StartTask(taskid)
-		resp = map[string]interface{}{"status": 200}
+		if num := len(strings.Split(taskid, "-")); num == 2 {
+			logs.Info(t.Ctx.Input.IP() + " Start Task " + taskid)
+			models.StartTask(taskid)
+			resp = map[string]interface{}{"status": 200}
+		} else {
+			resp = map[string]interface{}{"status": 10017, "error": "args is wrong"}
+		}
 	} else {
 		resp = map[string]interface{}{"status": 10016, "error": "Miss required parameter"}
 	}
