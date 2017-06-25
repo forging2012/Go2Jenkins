@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"net/url"
 	"time"
+	"math/rand"
 
 	"github.com/OwnLocal/goes"
 	"github.com/astaxie/beego"
@@ -72,4 +73,17 @@ func Read(filename string) (string, error) {
 		return "", err
 	}
 	return string(data), nil
+}
+//生成一个大于30000小于65535的数
+func randNum() int {
+	min := 30000
+	//max := 65535
+	
+	SUIJI:
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
+    num := r.Intn(65534)
+	if num < min {
+		goto SUIJI
+	}
+	return num
 }
