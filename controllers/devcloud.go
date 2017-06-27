@@ -29,6 +29,12 @@ func (d *DevCloudController) Create() {
 	if ProjectName != "" && SvnUrl != "" {
 		logs.Info(clientip + " create " + ProjectName + " " + SvnUrl)
 		resp = models.GetCreateResult(ProjectName, SvnUrl)
+		if ret, err := models.GetJsonFromMsi(resp); err != nil {
+			logs.Info(err.Error())
+		} else {
+
+			logs.Info(ret)
+		}
 	} else {
 		resp = map[string]interface{}{"status": 10016, "error": "Miss required parameter"}
 	}
@@ -48,6 +54,12 @@ func (d *DevCloudController) CheckOut() {
 		resp := make(map[string]string)
 		logs.Info(d.Ctx.Input.IP() + " checkout " + ProjectName)
 		resp = models.GetCheckOutResult(ProjectName)
+		if ret, err := models.GetJsonFromMss(resp); err != nil {
+			logs.Info(err.Error())
+		} else {
+
+			logs.Info(ret)
+		}
 		d.Data["json"] = resp
 		d.ServeJSON()
 	} else {
@@ -70,6 +82,12 @@ func (d *DevCloudController) CodeCheck() {
 		resp := make(map[string]string)
 		logs.Info(d.Ctx.Input.IP() + " codecheck " + ProjectName)
 		resp = models.GetCodeCheckResult(ProjectName)
+		if ret, err := models.GetJsonFromMss(resp); err != nil {
+			logs.Info(err.Error())
+		} else {
+
+			logs.Info(ret)
+		}
 		d.Data["json"] = resp
 		d.ServeJSON()
 	} else {
@@ -95,6 +113,12 @@ func (d *DevCloudController) Compile() {
 		logs.Info(d.Ctx.Input.IP() + " compile " + ProjectName)
 		resp := make(map[string]string)
 		resp = models.GetCompileResult(ProjectName, JdkVersion)
+		if ret, err := models.GetJsonFromMss(resp); err != nil {
+			logs.Info(err.Error())
+		} else {
+
+			logs.Info(ret)
+		}
 		d.Data["json"] = resp
 		d.ServeJSON()
 	} else {
@@ -123,6 +147,12 @@ func (d *DevCloudController) Pack() {
 		resp := make(map[string]string)
 		logs.Info(d.Ctx.Input.IP() + " pack " + ProjectName)
 		resp = models.GetPackResult(ProjectName, Version, IsE)
+		if ret, err := models.GetJsonFromMss(resp); err != nil {
+			logs.Info(err.Error())
+		} else {
+
+			logs.Info(ret)
+		}
 		d.Data["json"] = resp
 		d.ServeJSON()
 	} else {

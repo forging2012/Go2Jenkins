@@ -16,6 +16,7 @@ const (
 	EsCronInfo   = "croninfo"
 	FileCronInfo = "./conf/croninfo"
 )
+
 /*
 func loadCronFromConfig() {
 	var croninfos []CronInfo
@@ -49,7 +50,7 @@ func loadCronFromEs() {
 			for _, croninfo := range croninfos {
 				logs.Info("load cron from es")
 				AddTask(croninfo.Project, croninfo.TaskName, croninfo.Spec, croninfo.TaskList, time.Now())
-				
+
 			}
 		}
 	}
@@ -76,7 +77,7 @@ func loadCronFromFile() {
 				//状态为N的，先添加执行时间是01/01/0001，然后在停止
 				next, _ := time.Parse("01/02/2006", "01/01/0001")
 				AddTask(croninfo.Project, croninfo.TaskName, croninfo.Spec, croninfo.TaskList, next)
-				StopTask(croninfo.Project +"-"+ croninfo.TaskName)
+				StopTask(croninfo.Project + "-" + croninfo.TaskName)
 			}
 		}
 	}
@@ -170,11 +171,11 @@ func AddTask(project, taskname, spec, tasklist string, next time.Time) {
 			nextRunTime := toolbox.AdminTaskList[beego_taskname].GetNext().Format("2006-01-02 15:04:05")
 			ci := &CronInfo{project, taskname, spec, tasklist, preRunTime, nextRunTime, "Y"}
 			//添加任务信息至CronInfos
-			CronInfos = append(CronInfos,ci)
+			CronInfos = append(CronInfos, ci)
 			if croninfos, err := json.Marshal(&ci); err != nil {
 				panic(err)
 			} else {
-					logs.Info("AddTask: " + string(croninfos))
+				logs.Info("AddTask: " + string(croninfos))
 			}
 		}
 	}
@@ -191,7 +192,7 @@ func DelTask(task_id string) {
 	//利用一个新的切片，将删除的剔除
 	for _, croninfo := range CronInfos {
 		if project != croninfo.Project && taskname != croninfo.TaskName {
-			croninfos = append(croninfos,croninfo)
+			croninfos = append(croninfos, croninfo)
 		}
 	}
 	CronInfos = croninfos
@@ -204,10 +205,11 @@ func StartTask(task_id string) {
 	for _, croninfo := range CronInfos {
 		if project == croninfo.Project && taskname == croninfo.TaskName {
 			logs.Info("StartTask: " + task_id)
-			AddTask(croninfo.Project, croninfo.TaskName, croninfo.Spec, croninfo.TaskList, time.Now())			
+			AddTask(croninfo.Project, croninfo.TaskName, croninfo.Spec, croninfo.TaskList, time.Now())
 		}
 	}
 }
+
 //停止任务首先删除保存在toolbox里面的任务，然后将全局变量CronInfos中该条任务的状态设为N
 func StopTask(task_id string) {
 	project := strings.Split(task_id, "-")[0]
@@ -216,7 +218,7 @@ func StopTask(task_id string) {
 		if project == croninfo.Project && taskname == croninfo.TaskName {
 			logs.Info("StopTask: " + task_id)
 			toolbox.DeleteTask(task_id)
-			croninfo.TaskStatus = "N"				
+			croninfo.TaskStatus = "N"
 		}
 	}
 }
@@ -234,6 +236,7 @@ func DelayTask(task_id string) {
 		}
 	}
 }
+
 var CronInfos []*CronInfo
 
 type CronInfo struct {

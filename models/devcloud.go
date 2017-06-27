@@ -1,15 +1,9 @@
 package models
 
 import (
-	//"net/url"
 	"os/exec"
 	"regexp"
 	"strings"
-	//"time"
-
-	"github.com/astaxie/beego"
-	//"github.com/astaxie/beego/logs"
-	//"github.com/OwnLocal/goes"
 )
 
 type Result struct {
@@ -21,44 +15,23 @@ type Result struct {
 	//next        string
 	PACKAGE_URL string
 	SONAR_URL   string
-	es_result string
+	es_result   string
 }
 
 var resp map[string]string
 
-/*
-func getClient() (conn *goes.Client) {
-	conn = goes.NewClient(beego.AppConfig.String("ES_HOST"), beego.AppConfig.String("ES_PORT"))
-	return
-}
+const (
+	create    = "create.sh"
+	checkout  = "checkout.sh"
+	codecheck = "codecheck.sh"
+	compile   = "compile.sh"
+	pack      = "pack.sh"
+)
 
-func writeEs(opt, id string, ret interface{}) (string, string, string, error) {
-	conn := getClient()
-	var esid interface{}
-	if id != "" {
-		esid = id
-	}
-	d := goes.Document{
-		Index: beego.AppConfig.String("Index"),
-		Type:  opt,
-		ID:    esid,
-		Fields: map[string]interface{}{
-			"msg":    ret,
-			"intime": time.Now().Format("2006-01-02 15:04:05"),
-		},
-	}
-	extraArgs := make(url.Values, 0)
-	response, err := conn.Index(d, extraArgs)
-	if err != nil {
-		return "", "", "", err
-	}
-	return response.Index, response.Type, response.ID, nil
-}
-*/
 func GetCreateResult(project_name, svn_url string) (resp map[string]interface{}) {
 	resp = make(map[string]interface{})
 	var ret string
-	out, err := exec.Command("/bin/bash", beego.AppConfig.String("create"), project_name, svn_url).Output()
+	out, err := exec.Command("/bin/bash", create, project_name, svn_url).Output()
 	if err != nil {
 		ret = string(out) + "|" + err.Error()
 		resp["current"] = "N"
@@ -89,7 +62,7 @@ func GetCreateResult(project_name, svn_url string) (resp map[string]interface{})
 func GetCheckOutResult(project_name string) (resp map[string]string) {
 	resp = make(map[string]string)
 	var ret string
-	out, err := exec.Command("/bin/bash", beego.AppConfig.String("checkout"), project_name).Output()
+	out, err := exec.Command("/bin/bash", checkout, project_name).Output()
 	if err != nil {
 		ret = string(out) + "|" + err.Error()
 		resp["current"] = "N"
@@ -113,14 +86,13 @@ func GetCheckOutResult(project_name string) (resp map[string]string) {
 	resp["_type"] = Type
 	resp["ID"] = Id
 	resp["result"] = ret
-
 	return
 }
 
 func GetCodeCheckResult(project_name string) (resp map[string]string) {
 	resp = make(map[string]string)
 	var ret string
-	out, err := exec.Command("/bin/bash", beego.AppConfig.String("codecheck"), project_name).Output()
+	out, err := exec.Command("/bin/bash", codecheck, project_name).Output()
 	if err != nil {
 		ret = string(out) + "|" + err.Error()
 		resp["current"] = "N"
@@ -153,7 +125,7 @@ func GetCodeCheckResult(project_name string) (resp map[string]string) {
 func GetCompileResult(project_name, jdk_version string) (resp map[string]string) {
 	resp = make(map[string]string)
 	var ret string
-	out, err := exec.Command("/bin/bash", beego.AppConfig.String("compile"), project_name, jdk_version).Output()
+	out, err := exec.Command("/bin/bash", compile, project_name, jdk_version).Output()
 	if err != nil {
 		ret = string(out) + "|" + err.Error()
 		resp["current"] = "N"
@@ -183,7 +155,7 @@ func GetCompileResult(project_name, jdk_version string) (resp map[string]string)
 func GetPackResult(project_name, version, isE string) (resp map[string]string) {
 	resp = make(map[string]string)
 	var ret string
-	out, err := exec.Command("/bin/bash", beego.AppConfig.String("pack"), project_name, version, isE).Output()
+	out, err := exec.Command("/bin/bash", pack, project_name, version, isE).Output()
 	if err != nil {
 		ret = string(out) + "|" + err.Error()
 		resp["current"] = "N"

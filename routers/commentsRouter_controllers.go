@@ -48,41 +48,6 @@ func init() {
 			AllowHTTPMethods: []string{"get"},
 			Params: nil})
 
-	beego.GlobalControllerRouter["devcloud/controllers:ObjectController"] = append(beego.GlobalControllerRouter["devcloud/controllers:ObjectController"],
-		beego.ControllerComments{
-			Method: "Post",
-			Router: `/`,
-			AllowHTTPMethods: []string{"post"},
-			Params: nil})
-
-	beego.GlobalControllerRouter["devcloud/controllers:ObjectController"] = append(beego.GlobalControllerRouter["devcloud/controllers:ObjectController"],
-		beego.ControllerComments{
-			Method: "Get",
-			Router: `/:objectId`,
-			AllowHTTPMethods: []string{"get"},
-			Params: nil})
-
-	beego.GlobalControllerRouter["devcloud/controllers:ObjectController"] = append(beego.GlobalControllerRouter["devcloud/controllers:ObjectController"],
-		beego.ControllerComments{
-			Method: "GetAll",
-			Router: `/`,
-			AllowHTTPMethods: []string{"get"},
-			Params: nil})
-
-	beego.GlobalControllerRouter["devcloud/controllers:ObjectController"] = append(beego.GlobalControllerRouter["devcloud/controllers:ObjectController"],
-		beego.ControllerComments{
-			Method: "Put",
-			Router: `/:objectId`,
-			AllowHTTPMethods: []string{"put"},
-			Params: nil})
-
-	beego.GlobalControllerRouter["devcloud/controllers:ObjectController"] = append(beego.GlobalControllerRouter["devcloud/controllers:ObjectController"],
-		beego.ControllerComments{
-			Method: "Delete",
-			Router: `/:objectId`,
-			AllowHTTPMethods: []string{"delete"},
-			Params: nil})
-
 	beego.GlobalControllerRouter["devcloud/controllers:TaskController"] = append(beego.GlobalControllerRouter["devcloud/controllers:TaskController"],
 		beego.ControllerComments{
 			Method: "Add",
@@ -97,52 +62,24 @@ func init() {
 			AllowHTTPMethods: []string{"get"},
 			Params: nil})
 
-	beego.GlobalControllerRouter["devcloud/controllers:UserController"] = append(beego.GlobalControllerRouter["devcloud/controllers:UserController"],
+	beego.GlobalControllerRouter["devcloud/controllers:TaskController"] = append(beego.GlobalControllerRouter["devcloud/controllers:TaskController"],
 		beego.ControllerComments{
-			Method: "Post",
-			Router: `/`,
-			AllowHTTPMethods: []string{"post"},
-			Params: nil})
-
-	beego.GlobalControllerRouter["devcloud/controllers:UserController"] = append(beego.GlobalControllerRouter["devcloud/controllers:UserController"],
-		beego.ControllerComments{
-			Method: "GetAll",
-			Router: `/`,
+			Method: "GetALL",
+			Router: `/getall`,
 			AllowHTTPMethods: []string{"get"},
 			Params: nil})
 
-	beego.GlobalControllerRouter["devcloud/controllers:UserController"] = append(beego.GlobalControllerRouter["devcloud/controllers:UserController"],
+	beego.GlobalControllerRouter["devcloud/controllers:TaskController"] = append(beego.GlobalControllerRouter["devcloud/controllers:TaskController"],
 		beego.ControllerComments{
-			Method: "Get",
-			Router: `/:uid`,
+			Method: "Stop",
+			Router: `/stop`,
 			AllowHTTPMethods: []string{"get"},
 			Params: nil})
 
-	beego.GlobalControllerRouter["devcloud/controllers:UserController"] = append(beego.GlobalControllerRouter["devcloud/controllers:UserController"],
+	beego.GlobalControllerRouter["devcloud/controllers:TaskController"] = append(beego.GlobalControllerRouter["devcloud/controllers:TaskController"],
 		beego.ControllerComments{
-			Method: "Put",
-			Router: `/:uid`,
-			AllowHTTPMethods: []string{"put"},
-			Params: nil})
-
-	beego.GlobalControllerRouter["devcloud/controllers:UserController"] = append(beego.GlobalControllerRouter["devcloud/controllers:UserController"],
-		beego.ControllerComments{
-			Method: "Delete",
-			Router: `/:uid`,
-			AllowHTTPMethods: []string{"delete"},
-			Params: nil})
-
-	beego.GlobalControllerRouter["devcloud/controllers:UserController"] = append(beego.GlobalControllerRouter["devcloud/controllers:UserController"],
-		beego.ControllerComments{
-			Method: "Login",
-			Router: `/login`,
-			AllowHTTPMethods: []string{"get"},
-			Params: nil})
-
-	beego.GlobalControllerRouter["devcloud/controllers:UserController"] = append(beego.GlobalControllerRouter["devcloud/controllers:UserController"],
-		beego.ControllerComments{
-			Method: "Logout",
-			Router: `/logout`,
+			Method: "Start",
+			Router: `/start`,
 			AllowHTTPMethods: []string{"get"},
 			Params: nil})
 

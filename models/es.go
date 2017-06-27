@@ -3,10 +3,11 @@ package models
 import (
 	"crypto/md5"
 	"encoding/hex"
+	"encoding/json"
 	"io/ioutil"
+	"math/rand"
 	"net/url"
 	"time"
-	"math/rand"
 
 	"github.com/OwnLocal/goes"
 	"github.com/astaxie/beego"
@@ -74,16 +75,33 @@ func Read(filename string) (string, error) {
 	}
 	return string(data), nil
 }
+
 //生成一个大于30000小于65535的数
 func randNum() int {
 	min := 30000
 	//max := 65535
-	
-	SUIJI:
+
+SUIJI:
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
-    num := r.Intn(65534)
+	num := r.Intn(65534)
 	if num < min {
 		goto SUIJI
 	}
 	return num
+}
+
+func GetJsonFromMss(text map[string]string) (string, error) {
+	if info, err := json.Marshal(&text); err != nil {
+		return "", err
+	} else {
+		return string(info), nil
+	}
+}
+
+func GetJsonFromMsi(text map[string]interface{}) (string, error) {
+	if info, err := json.Marshal(&text); err != nil {
+		return "", err
+	} else {
+		return string(info), nil
+	}
 }
