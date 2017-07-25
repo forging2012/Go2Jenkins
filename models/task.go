@@ -139,7 +139,7 @@ func doFunc(project, taskname, tasklist string) {
 		beego_taskname := project + "-" + taskname
 		logs.Info("TaskResult: " + beego_taskname + " " + string(rets))
 		// /devclouds_logs/crontask/$project-$taskname
-		writeEs("crontask", beego_taskname, string(rets))
+		writeEs(Es_index, "crontask", beego_taskname, map[string]interface{}{"msg": string(rets), "intime": time.Now().Format("2006-01-02 15:04:05")})
 	}
 }
 
@@ -288,7 +288,7 @@ func monitor() {
 		//写入本地文件
 		Write(FileCronInfo, string(croninfos))
 		//写入es
-		//writeEs(EsCronInfo, EsCronInfo, string(croninfos))
+		//writeEs(Es_index, EsCronInfo, EsCronInfo, map[string]interface{}{"msg": string(croninfos), "intime": time.Now().Format("2006-01-02 15:04:05")})
 	}
 	//logs.Info(toolbox.AdminTaskList)
 }

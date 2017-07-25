@@ -207,6 +207,36 @@
                 }
             }
         },
+        "/runcmd/": {
+            "post": {
+                "tags": [
+                    "runcmd"
+                ],
+                "description": "run remote cmd",
+                "operationId": "SshController.runcmd",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "The server ssh info",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.SshServer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "schema": {
+                            "$ref": "#/definitions/models.CmdResult"
+                        }
+                    },
+                    "403": {
+                        "description": "body is empty"
+                    }
+                }
+            }
+        },
         "/task/add": {
             "get": {
                 "tags": [
@@ -367,6 +397,21 @@
         }
     },
     "definitions": {
+        "models.CmdResult": {
+            "title": "CmdResult",
+            "type": "object",
+            "properties": {
+                "Command": {
+                    "type": "string"
+                },
+                "Ip": {
+                    "type": "string"
+                },
+                "Result": {
+                    "type": "string"
+                }
+            }
+        },
         "models.CronInfo": {
             "title": "CronInfo",
             "type": "object",
@@ -423,6 +468,28 @@
                     "type": "string"
                 }
             }
+        },
+        "models.SshServer": {
+            "title": "SshServer",
+            "type": "object",
+            "properties": {
+                "Cmd": {
+                    "type": "string"
+                },
+                "Ip": {
+                    "type": "string"
+                },
+                "Password": {
+                    "type": "string"
+                },
+                "Port": {
+                    "type": "integer",
+                    "format": "int64"
+                },
+                "Username": {
+                    "type": "string"
+                }
+            }
         }
     },
     "tags": [
@@ -436,6 +503,10 @@
         },
         {
             "name": "task",
+            "description": "Operations about task\n"
+        },
+        {
+            "name": "runcmd",
             "description": "Operations about task\n"
         }
     ]

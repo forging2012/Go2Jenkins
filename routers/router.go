@@ -27,6 +27,11 @@ func init() {
 				&controllers.TaskController{},
 			),
 		),
+		beego.NSNamespace("/runcmd",
+			beego.NSInclude(
+				&controllers.SshController{},
+			),
+		),
 	)
 	beego.AddNamespace(ns)
 }

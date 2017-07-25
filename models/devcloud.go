@@ -4,6 +4,9 @@ import (
 	"os/exec"
 	"regexp"
 	"strings"
+	"time"
+
+	"github.com/astaxie/beego"
 )
 
 type Result struct {
@@ -28,6 +31,8 @@ const (
 	pack      = "pack.sh"
 )
 
+var Es_index = beego.AppConfig.String("Index")
+
 func GetCreateResult(project_name, svn_url string) (resp map[string]interface{}) {
 	resp = make(map[string]interface{})
 	var ret string
@@ -42,7 +47,7 @@ func GetCreateResult(project_name, svn_url string) (resp map[string]interface{})
 		//resp["next"] = "Y"
 	}
 	//write es
-	Index, Type, Id, err := writeEs("create", "", ret)
+	Index, Type, Id, err := writeEs(Es_index, "create", "", map[string]interface{}{"msg": ret, "intime": time.Now().Format("2006-01-02 15:04:05")})
 	if err != nil {
 		//resp["result"] = ret
 		//es报错
@@ -74,7 +79,7 @@ func GetCheckOutResult(project_name string) (resp map[string]string) {
 	}
 
 	//write es
-	Index, Type, Id, err := writeEs("checkout", "", ret)
+	Index, Type, Id, err := writeEs(Es_index, "checkout", "", map[string]interface{}{"msg": ret, "intime": time.Now().Format("2006-01-02 15:04:05")})
 	if err != nil {
 		//resp["result"] = ret
 		resp["es_result"] = err.Error()
@@ -108,7 +113,7 @@ func GetCodeCheckResult(project_name string) (resp map[string]string) {
 	}
 
 	//write es
-	Index, Type, Id, err := writeEs("codecheck", "", ret)
+	Index, Type, Id, err := writeEs(Es_index, "codecheck", "", map[string]interface{}{"msg": ret, "intime": time.Now().Format("2006-01-02 15:04:05")})
 	if err != nil {
 		//resp["result"] = ret
 		resp["es_result"] = err.Error()
@@ -137,7 +142,7 @@ func GetCompileResult(project_name, jdk_version string) (resp map[string]string)
 		//resp["next"] = "Y"
 	}
 	//write es
-	Index, Type, Id, err := writeEs("compile", "", ret)
+	Index, Type, Id, err := writeEs(Es_index, "compile", "", map[string]interface{}{"msg": ret, "intime": time.Now().Format("2006-01-02 15:04:05")})
 	if err != nil {
 		//resp["result"] = ret
 		resp["es_result"] = err.Error()
@@ -179,7 +184,7 @@ func GetPackResult(project_name, version, isE string) (resp map[string]string) {
 	}
 
 	//write es
-	Index, Type, Id, err := writeEs("pack", "", ret)
+	Index, Type, Id, err := writeEs(Es_index, "pack", "", map[string]interface{}{"msg": ret, "intime": time.Now().Format("2006-01-02 15:04:05")})
 	if err != nil {
 		//resp["result"] = ret
 		resp["es_result"] = err.Error()

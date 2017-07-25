@@ -18,20 +18,18 @@ func getClient() (conn *goes.Client) {
 	return
 }
 
-func writeEs(es_type, es_id string, ret interface{}) (string, string, string, error) {
+//es_id为空时，随机生成id
+func writeEs(es_index, es_type, es_id string, ret map[string]interface{}) (string, string, string, error) {
 	conn := getClient()
 	var esid interface{}
 	if es_id != "" {
 		esid = es_id
 	}
 	d := goes.Document{
-		Index: beego.AppConfig.String("Index"),
-		Type:  es_type,
-		ID:    esid,
-		Fields: map[string]interface{}{
-			"msg":    ret,
-			"intime": time.Now().Format("2006-01-02 15:04:05"),
-		},
+		Index:  es_index,
+		Type:   es_type,
+		ID:     esid,
+		Fields: ret,
 	}
 	extraArgs := make(url.Values, 0)
 	response, err := conn.Index(d, extraArgs)
@@ -40,10 +38,8 @@ func writeEs(es_type, es_id string, ret interface{}) (string, string, string, er
 	}
 	return response.Index, response.Type, response.ID, nil
 }
-
-func search(es_type, es_id string) (ret *goes.Response, err error) {
+func search(es_index, es_type, es_id string) (ret *goes.Response, err error) {
 	conn := getClient()
-	es_index := beego.AppConfig.String("Index")
 	extraArgs := make(url.Values, 0)
 	ret, err = conn.Get(es_index, es_type, es_id, extraArgs)
 	if err != nil {
