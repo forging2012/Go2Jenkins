@@ -7,7 +7,7 @@ import (
 	"github.com/astaxie/beego"
 )
 
-// Operations about task
+// Operations about run cmd
 type SshController struct {
 	beego.Controller
 }

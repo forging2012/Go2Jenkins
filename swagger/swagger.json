@@ -271,6 +271,18 @@
                     "10016": {
                         "description": "Miss required parameter"
                     },
+                    "10017": {
+                        "description": "Project already set task"
+                    },
+                    "10021": {
+                        "description": "spec can not set all *"
+                    },
+                    "10022": {
+                        "description": "0 \u003c= m \u003c= 59"
+                    },
+                    "10023": {
+                        "description": "0 \u003c= h \u003c 24"
+                    },
                     "200": {
                         "description": "{\"status\": 200,\"task_in_estype\":\"crontask\", \"task_in_esid\":id}"
                     },
@@ -291,7 +303,7 @@
                     {
                         "in": "query",
                         "name": "taskid",
-                        "description": "task id",
+                        "description": "task name",
                         "required": true,
                         "type": "string"
                     }
@@ -300,8 +312,8 @@
                     "10016": {
                         "description": "Miss required parameter"
                     },
-                    "10017": {
-                        "description": "args is wrong"
+                    "10018": {
+                        "description": "task in not exist"
                     },
                     "200": {
                         "description": "{\"status\": 200}"
@@ -342,7 +354,7 @@
                     {
                         "in": "query",
                         "name": "taskid",
-                        "description": "task id",
+                        "description": "task name",
                         "required": true,
                         "type": "string"
                     }
@@ -351,8 +363,11 @@
                     "10016": {
                         "description": "Miss required parameter"
                     },
-                    "10017": {
-                        "description": "args is wrong"
+                    "10018": {
+                        "description": "task is not exist"
+                    },
+                    "10020": {
+                        "description": "task is already start"
                     },
                     "200": {
                         "description": "{\"status\": 200}"
@@ -374,7 +389,7 @@
                     {
                         "in": "query",
                         "name": "taskid",
-                        "description": "task id",
+                        "description": "task name",
                         "required": true,
                         "type": "string"
                     }
@@ -383,8 +398,11 @@
                     "10016": {
                         "description": "Miss required parameter"
                     },
-                    "10017": {
-                        "description": "args is wrong"
+                    "10018": {
+                        "description": "task is not exist"
+                    },
+                    "10019": {
+                        "description": "task is already stop"
                     },
                     "200": {
                         "description": "{\"status\": 200}"
@@ -507,7 +525,7 @@
         },
         {
             "name": "runcmd",
-            "description": "Operations about task\n"
+            "description": "Operations about run cmd\n"
         }
     ]
 }

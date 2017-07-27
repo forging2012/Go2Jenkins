@@ -77,7 +77,7 @@ func loadCronFromFile() {
 				//状态为N的，先添加执行时间是01/01/0001，然后在停止
 				next, _ := time.Parse("01/02/2006", "01/01/0001")
 				AddTask(croninfo.Project, croninfo.TaskName, croninfo.Spec, croninfo.TaskList, next)
-				StopTask(croninfo.Project + "-" + croninfo.TaskName)
+				StopTask(croninfo.TaskName)
 			}
 		}
 	}
@@ -136,39 +136,54 @@ func doFunc(project, taskname, tasklist string) {
 	if rets, err := json.Marshal(&ret); err != nil {
 		panic(err)
 	} else {
-		beego_taskname := project + "-" + taskname
-		logs.Info("TaskResult: " + beego_taskname + " " + string(rets))
-		// /devclouds_logs/crontask/$project-$taskname
-		writeEs(Es_index, "crontask", beego_taskname, map[string]interface{}{"msg": string(rets), "intime": time.Now().Format("2006-01-02 15:04:05")})
+		logs.Info("TaskResult: " + project + " " + taskname + " " + string(rets))
+		// /devclouds_logs/crontask/$taskname
+		writeEs(Es_index, "crontask", taskname, map[string]interface{}{"msg": string(rets), "intime": time.Now().Format("2006-01-02 15:04:05")})
 	}
 }
 
+//根据项目名/taskname查询是否存在
+func IsInTaskList(condition string) (bool, string) {
+	for _, croninfo := range CronInfos {
+		if condition == croninfo.Project {
+			return true, croninfo.TaskStatus
+		}
+	}
+
+	for _, croninfo := range CronInfos {
+		if condition == croninfo.TaskName {
+			return true, croninfo.TaskStatus
+		}
+	}
+	return false, ""
+}
+
 //重启系统，所有定时任务的下一次时间重新定义
+//所有的task都会保存到CronInfos
 func AddTask(project, taskname, spec, tasklist string, next time.Time) {
-	beego_taskname := project + "-" + taskname
-	if beego_taskname != "monitor" {
+	if taskname != "monitor" {
 		//f := func() error { fmt.Println(name + " task " + time.Now().Format("2006-01-02 15:04:05")); return nil }
 		f := func() error { doFunc(project, taskname, tasklist); return nil }
-		tk := toolbox.NewTask(beego_taskname, spec, f)
-		toolbox.AddTask(beego_taskname, tk)
+		tk := toolbox.NewTask(taskname, spec, f)
+		toolbox.AddTask(taskname, tk)
 		//tk.SetNext(time.Now())
 		tk.SetNext(next)
 		isNew := true
 		//如果添加的任务是之前停止的，则只是修改状态
 		//如果是新增的任务，继续添加到CronInfos
 		for _, croninfo := range CronInfos {
-			if project == croninfo.Project && taskname == croninfo.TaskName {
-				if beego_taskname != "monitor" {
+			if taskname == croninfo.TaskName {
+				if taskname != "monitor" {
 					croninfo.TaskStatus = "Y"
-					croninfo.PreRunTime = toolbox.AdminTaskList[beego_taskname].GetPrev().Format("2006-01-02 15:04:05")
-					croninfo.NextRunTime = toolbox.AdminTaskList[beego_taskname].GetNext().Format("2006-01-02 15:04:05")
+					croninfo.PreRunTime = toolbox.AdminTaskList[taskname].GetPrev().Format("2006-01-02 15:04:05")
+					croninfo.NextRunTime = toolbox.AdminTaskList[taskname].GetNext().Format("2006-01-02 15:04:05")
 				}
 				isNew = false
 			}
 		}
 		if isNew {
-			preRunTime := toolbox.AdminTaskList[beego_taskname].GetPrev().Format("2006-01-02 15:04:05")
-			nextRunTime := toolbox.AdminTaskList[beego_taskname].GetNext().Format("2006-01-02 15:04:05")
+			preRunTime := toolbox.AdminTaskList[taskname].GetPrev().Format("2006-01-02 15:04:05")
+			nextRunTime := toolbox.AdminTaskList[taskname].GetNext().Format("2006-01-02 15:04:05")
 			ci := &CronInfo{project, taskname, spec, tasklist, preRunTime, nextRunTime, "Y"}
 			//添加任务信息至CronInfos
 			CronInfos = append(CronInfos, ci)
@@ -181,17 +196,16 @@ func AddTask(project, taskname, spec, tasklist string, next time.Time) {
 	}
 }
 
-//task_id肯定是project-taskname
-func DelTask(task_id string) {
-	project := strings.Split(task_id, "-")[0]
-	taskname := strings.Split(task_id, "-")[1]
+//将task从taskadminlist中删除
+//并从CronInfos中删除
+func DelTask(task_name string) {
 	var croninfos []*CronInfo
 
-	logs.Info("Del Task " + task_id)
-	StopTask(task_id)
+	logs.Info("Del Task " + task_name)
+	StopTask(task_name)
 	//利用一个新的切片，将删除的剔除
 	for _, croninfo := range CronInfos {
-		if project != croninfo.Project && taskname != croninfo.TaskName {
+		if task_name != croninfo.TaskName {
 			croninfos = append(croninfos, croninfo)
 		}
 	}
@@ -199,34 +213,32 @@ func DelTask(task_id string) {
 
 }
 
-func StartTask(task_id string) {
-	project := strings.Split(task_id, "-")[0]
-	taskname := strings.Split(task_id, "-")[1]
+//将task重新添加
+//同时修改CronInfos中该task的状态
+func StartTask(task_name string) {
 	for _, croninfo := range CronInfos {
-		if project == croninfo.Project && taskname == croninfo.TaskName {
-			logs.Info("StartTask: " + task_id)
+		if task_name == croninfo.TaskName {
+			logs.Info("StartTask: " + croninfo.Project + " " + task_name)
 			AddTask(croninfo.Project, croninfo.TaskName, croninfo.Spec, croninfo.TaskList, time.Now())
 		}
 	}
 }
 
 //停止任务首先删除保存在toolbox里面的任务，然后将全局变量CronInfos中该条任务的状态设为N
-func StopTask(task_id string) {
-	project := strings.Split(task_id, "-")[0]
-	taskname := strings.Split(task_id, "-")[1]
+func StopTask(task_name string) {
 	for _, croninfo := range CronInfos {
-		if project == croninfo.Project && taskname == croninfo.TaskName {
-			logs.Info("StopTask: " + task_id)
-			toolbox.DeleteTask(task_id)
+		if task_name == croninfo.TaskName {
+			logs.Info("StopTask: " + croninfo.Project + " " + task_name)
+			toolbox.DeleteTask(task_name)
 			croninfo.TaskStatus = "N"
 		}
 	}
 }
 
-func DelayTask(task_id string) {
+func DelayTask(task_name string) {
 	admintasklist := toolbox.AdminTaskList
 	for beego_taskname, tasker := range admintasklist {
-		if beego_taskname == task_id {
+		if beego_taskname == task_name {
 			next := tasker.GetNext()
 			fmt.Println("before", tasker.GetNext())
 			mm, _ := time.ParseDuration("10m")
@@ -254,11 +266,9 @@ func GetAllTask() []*CronInfo {
 	admintasklist := toolbox.AdminTaskList
 	for beego_taskname, tasker := range admintasklist {
 		if beego_taskname != "monitor" {
-			project := strings.Split(beego_taskname, "-")[0]
-			taskname := strings.Split(beego_taskname, "-")[1]
 			for _, croninfo := range CronInfos {
 				//fmt.Println(reflect.TypeOf(croninfo.Project))
-				if project == croninfo.Project && taskname == croninfo.TaskName {
+				if beego_taskname == croninfo.TaskName {
 					croninfo.PreRunTime = tasker.GetPrev().Format("2006-01-02 15:04:05")
 					croninfo.NextRunTime = tasker.GetNext().Format("2006-01-02 15:04:05")
 				}

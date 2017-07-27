@@ -184,6 +184,14 @@ paths:
           description: Forbidden
         "10016":
           description: Miss required parameter
+        "10017":
+          description: Project already set task
+        "10021":
+          description: spec can not set all *
+        "10022":
+          description: 0 <= m <= 59
+        "10023":
+          description: 0 <= h < 24
   /task/del:
     get:
       tags:
@@ -193,7 +201,7 @@ paths:
       parameters:
       - in: query
         name: taskid
-        description: task id
+        description: task name
         required: true
         type: string
       responses:
@@ -203,8 +211,8 @@ paths:
           description: Forbidden
         "10016":
           description: Miss required parameter
-        "10017":
-          description: args is wrong
+        "10018":
+          description: task in not exist
   /task/getall:
     get:
       tags:
@@ -226,7 +234,7 @@ paths:
       parameters:
       - in: query
         name: taskid
-        description: task id
+        description: task name
         required: true
         type: string
       responses:
@@ -236,8 +244,10 @@ paths:
           description: Forbidden
         "10016":
           description: Miss required parameter
-        "10017":
-          description: args is wrong
+        "10018":
+          description: task is not exist
+        "10020":
+          description: task is already start
   /task/stop:
     get:
       tags:
@@ -247,7 +257,7 @@ paths:
       parameters:
       - in: query
         name: taskid
-        description: task id
+        description: task name
         required: true
         type: string
       responses:
@@ -257,8 +267,10 @@ paths:
           description: Forbidden
         "10016":
           description: Miss required parameter
-        "10017":
-          description: args is wrong
+        "10018":
+          description: task is not exist
+        "10019":
+          description: task is already stop
 definitions:
   models.CmdResult:
     title: CmdResult
@@ -335,4 +347,4 @@ tags:
     Operations about task
 - name: runcmd
   description: |
-    Operations about task
+    Operations about run cmd
