@@ -3,6 +3,7 @@ package models
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
 	//"reflect"
 	"strings"
 	"time"
@@ -99,27 +100,28 @@ func doFunc(project, taskname, tasklist string) {
 		tk_name := strings.Split(tk, "|")[0]
 		switch {
 		case tk_name == "checkout":
-			result := GetCheckOutResult(project)["result"]
+			result := GetCheckOutResult(project, taskname)["result"]
 			if strings.Contains(result, "exit status") {
 				isexit = true
 			}
 			ret.CHECKOUT = result
 		case tk_name == "codecheck":
-			result := GetCodeCheckResult(project)["result"]
+			result := GetCodeCheckResult(project, taskname)["result"]
 			if strings.Contains(result, "exit status") {
 				isexit = true
 			}
 			ret.CODECHECK = result
 		case tk_name == "compile":
 			jdk_version := strings.Split(tk, "|")[1]
-			result := GetCompileResult(project, jdk_version)["result"]
+			result := GetCompileResult(project, jdk_version, taskname)["result"]
 			if strings.Contains(result, "exit status") {
 				isexit = true
 			}
 			ret.COMPILE = result
 		case tk_name == "pack":
 			version := strings.Split(tk, "|")[1]
-			result := GetPackResult(project, version, "N")["result"]
+			jdkversion := strings.Split(tk, "|")[2]
+			result := GetPackResult(project, version, "N", jdkversion, taskname)["result"]
 			if strings.Contains(result, "exit status") {
 				isexit = true
 			}
@@ -156,6 +158,53 @@ func IsInTaskList(condition string) (bool, string) {
 		}
 	}
 	return false, ""
+}
+
+//校验定时任务spec的格式
+func CheckSpec(spec string) (int, string) {
+	specs := strings.Split(spec, " ")
+	if len(specs) != 6 {
+		return 10021, "spec has error,spec must be like (秒 分钟 小时 天 月 星期)"
+	}
+	if strings.Count(spec, "*") == 6 {
+		return 10021, "spec has error,spec can not set all *"
+	}
+	for n, s := range specs {
+		if n == 1 {
+			m, err := strconv.Atoi(s)
+			if err != nil {
+				return 10021, "spec has error,minutes must be number"
+			} else {
+				if m < 0 || m > 59 {
+					return 10021, "spec has error,0 <= minutes <= 59"
+				}
+			}
+		}
+		if n == 2 {
+			h, err := strconv.Atoi(s)
+			if err != nil {
+				return 10021, "spec has error,hour must be number"
+			} else {
+				if h < 0 || h >= 24 {
+					return 10021, "spec has error,0 <= hour < 24"
+				}
+			}
+		}
+		if n == 4 {
+			if s != "*" {
+				month, err := strconv.Atoi(s)
+				if err != nil {
+					return 10021, "spec has error,month must be number or *"
+				} else {
+					if month < 1 || month > 12 {
+						return 10021, "spec has error,0 < mouth < 13"
+					}
+				}
+			}
+		}
+	}
+	return 0, ""
+
 }
 
 //重启系统，所有定时任务的下一次时间重新定义

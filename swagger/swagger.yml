@@ -7,6 +7,44 @@ info:
     email: yaoyf@asiainfo.com
 basePath: /v1
 paths:
+  /cache/del:
+    get:
+      tags:
+      - cache
+      description: delete mem cache
+      operationId: CacheController.DelMemCache
+      parameters:
+      - in: query
+        name: project_name
+        description: project name
+        required: true
+        type: string
+      responses:
+        "200":
+          description: '{"status": 200}'
+        "403":
+          description: Forbidden
+        "10016":
+          description: Miss required parameter
+        "10018":
+          description: is not in memory cache
+  /cache/get:
+    get:
+      tags:
+      - cache
+      description: Get Memory cache
+      operationId: CacheController.Get Memory cache
+      parameters:
+      - in: query
+        name: project_name
+        description: project name
+        required: true
+        type: string
+      responses:
+        "200":
+          description: '{"status": 200}'
+        "403":
+          description: Forbidden
   /dc/checkout:
     get:
       tags:
@@ -17,6 +55,11 @@ paths:
       - in: query
         name: project_name
         description: project name
+        required: true
+        type: string
+      - in: query
+        name: flow_id
+        description: 每个持续集成流程id
         required: true
         type: string
       responses:
@@ -37,6 +80,11 @@ paths:
       - in: query
         name: project_name
         description: project name
+        required: true
+        type: string
+      - in: query
+        name: flow_id
+        description: 每个持续集成流程id
         required: true
         type: string
       responses:
@@ -62,6 +110,11 @@ paths:
       - in: query
         name: jdk_version
         description: jdk version {1.5 1.6 1.7 1.8}
+        required: true
+        type: string
+      - in: query
+        name: flow_id
+        description: 每个持续集成流程id
         required: true
         type: string
       responses:
@@ -117,6 +170,16 @@ paths:
       - in: query
         name: isE
         description: 是否紧急发布Y/N
+        required: true
+        type: string
+      - in: query
+        name: jdk_version
+        description: jdk version {1.5 1.6 1.7 1.8}
+        required: true
+        type: string
+      - in: query
+        name: flow_id
+        description: 每个持续集成流程id
         required: true
         type: string
       responses:
@@ -187,11 +250,7 @@ paths:
         "10017":
           description: Project already set task
         "10021":
-          description: spec can not set all *
-        "10022":
-          description: 0 <= m <= 59
-        "10023":
-          description: 0 <= h < 24
+          description: spec has error
   /task/del:
     get:
       tags:
@@ -212,7 +271,7 @@ paths:
         "10016":
           description: Miss required parameter
         "10018":
-          description: task in not exist
+          description: task is not exist
   /task/getall:
     get:
       tags:
@@ -348,3 +407,6 @@ tags:
 - name: runcmd
   description: |
     Operations about run cmd
+- name: cache
+  description: |
+    Operations about memory cache

@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"devcloud/models"
-	"strconv"
 	"strings"
 	"time"
 
@@ -23,9 +22,7 @@ type TaskController struct {
 // @Success 200 {"status": 200,"task_in_estype":"crontask", "task_in_esid":id}
 // @Failure 10016 Miss required parameter
 // @Failure 10017 Project already set task
-// @Failure 10021 spec can not set all *
-// @Failure 10022 0 <= m <= 59
-// @Failure 10023 0 <= h < 24
+// @Failure 10021 spec has error
 // @Failure 403 Forbidden
 // @router /add [get]
 func (t *TaskController) Add() {
@@ -35,58 +32,38 @@ func (t *TaskController) Add() {
 	tasklist := t.GetString("tasklist")
 	resp := make(map[string]interface{})
 	if project_name != "" && spec != "" && tasklist != "" {
-		if strings.Count(spec, "*") == 6 {
-			resp = map[string]interface{}{"status": 10021, "error": "spec can not set all *"}
+		if code, ret := models.CheckSpec(spec); code != 0 {
+			resp = map[string]interface{}{"status": code, "error": ret}
 			goto finsh
-		}
-		specs := strings.Split(spec, " ")
-		for n, s := range specs {
-			if n == 1 {
-				m, err := strconv.Atoi(s)
-				if err != nil {
-					resp = map[string]interface{}{"status": 10022, "error": "0 <= m <= 59"}
-					goto finsh
-				} else {
-					if m < 0 || m > 59 {
-						resp = map[string]interface{}{"status": 10022, "error": "0 <= m <= 59"}
-						goto finsh
-					}
-				}
-			}
-			if n == 2 {
-				h, err := strconv.Atoi(s)
-				if err != nil {
-					resp = map[string]interface{}{"status": 10023, "error": "0 <= h < 24"}
-					goto finsh
-				} else {
-					if h < 0 || h >= 24 {
-						resp = map[string]interface{}{"status": 10023, "error": "0 <= h < 24"}
-						goto finsh
-					}
-				}
-			}
 		}
 		if hasproject, _ := models.IsInTaskList(project_name); hasproject {
 			resp = map[string]interface{}{"status": 10017, "error": project_name + " already set task"}
 			goto finsh
 		}
+		var jdk_version string
 		tks := strings.Split(tasklist, ";")
 		for _, tk := range tks {
 			tk_name := strings.Split(tk, "|")[0]
 			if tk_name == "compile" {
 				num := len(strings.Split(tk, "|"))
 				if num == 1 {
-					resp = map[string]interface{}{"status": 10016, "error": "Miss required parameter"}
+					resp = map[string]interface{}{"status": 10016, "error": "Miss required parameter,compile like compile|jdk_version"}
 					goto finsh
 				}
+				jdk_version = strings.Split(tk, "|")[1]
 			}
 			if tk_name == "pack" {
 				num := len(strings.Split(tk, "|"))
 				if num == 1 {
-					resp = map[string]interface{}{"status": 10016, "error": "Miss required parameter"}
+					resp = map[string]interface{}{"status": 10016, "error": "Miss required parameter,pack like pack|project_version"}
 					goto finsh
 				}
 			}
+		}
+		if jdk_version == "" {
+			tasklist = tasklist + "|" + "1.7"
+		} else {
+			tasklist = tasklist + "|" + jdk_version
 		}
 		logs.Info(t.Ctx.Input.IP() + " Add Task " + project_name + " " + task_name + " " + spec + " " + tasklist)
 		models.AddTask(project_name, task_name, spec, tasklist, time.Now())
@@ -104,7 +81,7 @@ finsh:
 // @Param	taskid	query 	string	true		"task name"
 // @Success 200 {"status": 200}
 // @Failure 10016 Miss required parameter
-// @Failure 10018 task in not exist
+// @Failure 10018 task is not exist
 // @Failure 403 Forbidden
 // @router /del [get]
 func (t *TaskController) Del() {
@@ -115,7 +92,7 @@ func (t *TaskController) Del() {
 			models.DelTask(taskname)
 			resp = map[string]interface{}{"status": 200}
 		} else {
-			resp = map[string]interface{}{"status": 10018, "error": "task in not exist"}
+			resp = map[string]interface{}{"status": 10018, "error": "task is not exist"}
 		}
 	} else {
 		resp = map[string]interface{}{"status": 10016, "error": "Miss required parameter"}

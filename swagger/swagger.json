@@ -10,6 +10,64 @@
     },
     "basePath": "/v1",
     "paths": {
+        "/cache/del": {
+            "get": {
+                "tags": [
+                    "cache"
+                ],
+                "description": "delete mem cache",
+                "operationId": "CacheController.DelMemCache",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "project_name",
+                        "description": "project name",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "10016": {
+                        "description": "Miss required parameter"
+                    },
+                    "10018": {
+                        "description": "is not in memory cache"
+                    },
+                    "200": {
+                        "description": "{\"status\": 200}"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                }
+            }
+        },
+        "/cache/get": {
+            "get": {
+                "tags": [
+                    "cache"
+                ],
+                "description": "Get Memory cache",
+                "operationId": "CacheController.Get Memory cache",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "project_name",
+                        "description": "project name",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"status\": 200}"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                }
+            }
+        },
         "/dc/checkout": {
             "get": {
                 "tags": [
@@ -22,6 +80,13 @@
                         "in": "query",
                         "name": "project_name",
                         "description": "project name",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "query",
+                        "name": "flow_id",
+                        "description": "每个持续集成流程id",
                         "required": true,
                         "type": "string"
                     }
@@ -53,6 +118,13 @@
                         "in": "query",
                         "name": "project_name",
                         "description": "project name",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "query",
+                        "name": "flow_id",
+                        "description": "每个持续集成流程id",
                         "required": true,
                         "type": "string"
                     }
@@ -91,6 +163,13 @@
                         "in": "query",
                         "name": "jdk_version",
                         "description": "jdk version {1.5 1.6 1.7 1.8}",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "query",
+                        "name": "flow_id",
+                        "description": "每个持续集成流程id",
                         "required": true,
                         "type": "string"
                     }
@@ -174,6 +253,20 @@
                         "in": "query",
                         "name": "isE",
                         "description": "是否紧急发布Y/N",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "query",
+                        "name": "jdk_version",
+                        "description": "jdk version {1.5 1.6 1.7 1.8}",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "query",
+                        "name": "flow_id",
+                        "description": "每个持续集成流程id",
                         "required": true,
                         "type": "string"
                     }
@@ -275,13 +368,7 @@
                         "description": "Project already set task"
                     },
                     "10021": {
-                        "description": "spec can not set all *"
-                    },
-                    "10022": {
-                        "description": "0 \u003c= m \u003c= 59"
-                    },
-                    "10023": {
-                        "description": "0 \u003c= h \u003c 24"
+                        "description": "spec has error"
                     },
                     "200": {
                         "description": "{\"status\": 200,\"task_in_estype\":\"crontask\", \"task_in_esid\":id}"
@@ -313,7 +400,7 @@
                         "description": "Miss required parameter"
                     },
                     "10018": {
-                        "description": "task in not exist"
+                        "description": "task is not exist"
                     },
                     "200": {
                         "description": "{\"status\": 200}"
@@ -526,6 +613,10 @@
         {
             "name": "runcmd",
             "description": "Operations about run cmd\n"
+        },
+        {
+            "name": "cache",
+            "description": "Operations about memory cache\n"
         }
     ]
 }

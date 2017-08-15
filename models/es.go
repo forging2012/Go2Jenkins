@@ -11,6 +11,7 @@ import (
 
 	"github.com/OwnLocal/goes"
 	"github.com/astaxie/beego"
+	"github.com/astaxie/beego/cache"
 )
 
 func getClient() (conn *goes.Client) {
@@ -100,4 +101,24 @@ func GetJsonFromMsi(text map[string]interface{}) (string, error) {
 	} else {
 		return string(info), nil
 	}
+}
+
+//缓存到内存中
+var mem, _ = cache.NewCache("memory", `{"interval":10}`)
+
+func setCache2Mem(key string, value interface{}, timeout time.Duration) {
+	mem.Put(key, value, timeout)
+}
+
+func GetCacheFromMem(key string) interface{} {
+	return mem.Get(key)
+}
+
+func IsExistInMem(key string) bool {
+	return mem.IsExist(key)
+}
+
+func DelCacheFromMem(key string) {
+	mem.Delete(key)
+
 }

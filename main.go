@@ -34,8 +34,14 @@ func main() {
 	//logs.SetLogger(logs.AdapterConsole, `{"level":7,"color":false}`)
 	logs.SetLogger(logs.AdapterFile, `{"filename":"./logs/beego.log","level":7}`)
 	beego.InsertFilter("/v1/dc/*", beego.BeforeExec, FilterIp)
-	beego.BConfig.WebConfig.DirectoryIndex = true
-	beego.BConfig.WebConfig.StaticDir["/swagger"] = "swagger"
+	if beego.BConfig.RunMode == "dev" {
+		beego.BConfig.WebConfig.DirectoryIndex = true
+		beego.BConfig.WebConfig.StaticDir["/swagger"] = "swagger"
+	}
+	if beego.BConfig.RunMode == "prod" {
+		beego.BConfig.WebConfig.DirectoryIndex = true
+		beego.BConfig.WebConfig.StaticDir["/Snapshot"] = beego.AppConfig.String("filepath")
+	}
 	toolbox.StartTask()
 	beego.Run()
 }

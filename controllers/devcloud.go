@@ -45,15 +45,18 @@ func (d *DevCloudController) Create() {
 // @Title DevCloud checkout code
 // @Description checkout code
 // @Param       project_name             query    string  true            "project name"
+// @Param       flow_id             query    string  true            "每个持续集成流程id"
 // @Success 200 {object} models.Result
 // @Failure 10016 Miss required parameter
 // @Failure 403 Forbidden
 // @router /checkout [get]
 func (d *DevCloudController) CheckOut() {
-	if ProjectName := d.GetString("project_name"); ProjectName != "" {
+	ProjectName := d.GetString("project_name")
+	Flowid := d.GetString("flow_id")
+	if ProjectName != "" && Flowid != "" {
 		resp := make(map[string]string)
-		logs.Info(d.Ctx.Input.IP() + " checkout " + ProjectName)
-		resp = models.GetCheckOutResult(ProjectName)
+		logs.Info(d.Ctx.Input.IP() + " checkout " + ProjectName + " " + Flowid)
+		resp = models.GetCheckOutResult(ProjectName, Flowid)
 		if ret, err := models.GetJsonFromMss(resp); err != nil {
 			logs.Info(err.Error())
 		} else {
@@ -73,15 +76,18 @@ func (d *DevCloudController) CheckOut() {
 // @Title DevCloud code check
 // @Description code check
 // @Param       project_name             query    string  true            "project name"
+// @Param       flow_id             query    string  true            "每个持续集成流程id"
 // @Success 200 {object} models.Result
 // @Failure 10016 Miss required parameter
 // @Failure 403 Forbidden
 // @router /codecheck [get]
 func (d *DevCloudController) CodeCheck() {
-	if ProjectName := d.GetString("project_name"); ProjectName != "" {
+	ProjectName := d.GetString("project_name")
+	Flowid := d.GetString("flow_id")
+	if ProjectName != "" && Flowid != "" {
 		resp := make(map[string]string)
-		logs.Info(d.Ctx.Input.IP() + " codecheck " + ProjectName)
-		resp = models.GetCodeCheckResult(ProjectName)
+		logs.Info(d.Ctx.Input.IP() + " codecheck " + ProjectName + " " + Flowid)
+		resp = models.GetCodeCheckResult(ProjectName, Flowid)
 		if ret, err := models.GetJsonFromMss(resp); err != nil {
 			logs.Info(err.Error())
 		} else {
@@ -102,6 +108,7 @@ func (d *DevCloudController) CodeCheck() {
 // @Description compile code
 // @Param       project_name             query    string  true            "project name"
 // @Param       jdk_version             query    string  true            "jdk version {1.5 1.6 1.7 1.8}"
+// @Param       flow_id             query    string  true            "每个持续集成流程id"
 // @Success 200 {object} models.Result
 // @Failure 10016 Miss required parameter
 // @Failure 403 Forbidden
@@ -109,10 +116,11 @@ func (d *DevCloudController) CodeCheck() {
 func (d *DevCloudController) Compile() {
 	ProjectName := d.GetString("project_name")
 	JdkVersion := d.GetString("jdk_version")
-	if ProjectName != "" && JdkVersion != "" {
-		logs.Info(d.Ctx.Input.IP() + " compile " + ProjectName)
+	Flowid := d.GetString("flow_id")
+	if ProjectName != "" && JdkVersion != "" && Flowid != "" {
+		logs.Info(d.Ctx.Input.IP() + " compile " + ProjectName + " " + Flowid)
 		resp := make(map[string]string)
-		resp = models.GetCompileResult(ProjectName, JdkVersion)
+		resp = models.GetCompileResult(ProjectName, JdkVersion, Flowid)
 		if ret, err := models.GetJsonFromMss(resp); err != nil {
 			logs.Info(err.Error())
 		} else {
@@ -135,6 +143,8 @@ func (d *DevCloudController) Compile() {
 // @Param       project_name             query    string  true            "project name"
 // @Param       version             query    string  true            "project version"
 // @Param       isE             query    string  true            "是否紧急发布Y/N"
+// @Param       jdk_version             query    string  true            "jdk version {1.5 1.6 1.7 1.8}"
+// @Param       flow_id             query    string  true            "每个持续集成流程id"
 // @Success 200 {object} models.Result
 // @Failure 10016 Miss required parameter
 // @Failure 403 Forbidden
@@ -143,10 +153,12 @@ func (d *DevCloudController) Pack() {
 	ProjectName := d.GetString("project_name")
 	Version := d.GetString("version")
 	IsE := d.GetString("isE")
-	if ProjectName != "" && Version != "" && IsE != "" {
+	JdkVersion := d.GetString("jdk_version")
+	Flowid := d.GetString("flow_id")
+	if ProjectName != "" && Version != "" && IsE != "" && JdkVersion != "" && Flowid != "" {
 		resp := make(map[string]string)
-		logs.Info(d.Ctx.Input.IP() + " pack " + ProjectName)
-		resp = models.GetPackResult(ProjectName, Version, IsE)
+		logs.Info(d.Ctx.Input.IP() + " pack " + ProjectName + " " + Flowid)
+		resp = models.GetPackResult(ProjectName, Version, IsE, JdkVersion, Flowid)
 		if ret, err := models.GetJsonFromMss(resp); err != nil {
 			logs.Info(err.Error())
 		} else {
